@@ -1,0 +1,278 @@
+:root {
+  --background: rgb(245, 245, 250);
+  --secondary-background: rgb(161, 160, 165);
+  --text-primary: #000000;
+  --text-secondary: rgb(24, 3, 56);
+  --accent: rgb(91, 105, 214);
+}
+
+[data-theme='dark'] {
+  --background: rgb(17, 17, 22);
+  --secondary-background: rgb(39, 36, 49);
+  --text-primary: #61dafb;
+  --text-secondary: #CE9FFF;
+  --accent: rgb(200, 7, 200);
+  --faded: #c4f0fd;
+}
+
+.App {
+  text-align: center;
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+img {
+  display: block;
+}
+
+.userProfile, #mainProfileImg {
+  border-radius: 12px;
+}
+
+/* HEADER */
+
+#header {
+  background-color: var(--background);
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: .5px solid var(--text-primary);
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  z-index: 2;
+  width: calc(100vw - 20px);
+}
+
+#logo, .navBarIcons {
+  width: 40px;
+  height: auto;
+  padding-right: 20px;
+}
+
+/* HEADER POP UPS */
+
+#notificationsPopUp, #accountPopUp {
+  background-color: var(--secondary-background);
+  color: var(--text-primary);
+  width: 150px;
+  position: absolute;
+  z-index: 2;
+  top: 51px;
+  left: -27px;
+}
+
+#logOutBtn:hover {
+  cursor: pointer;
+}
+
+.hide {
+  display: none;
+}
+
+.pad {
+  padding: 5px;
+}
+
+/* HOME PAGE */
+#content {
+  padding-top: 40px;
+  margin-top: 40px;
+}
+
+#newPostButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-primary);
+  border-radius: 12px;
+  background-color: var(--secondary-background);
+  height: min-content;
+  padding: 5px;
+  width: 490px;
+}
+
+.imgBackground {
+  background-color: var(--text-secondary);
+  border-radius: 12px;
+  margin: 5px;
+  width: calc((280px/7));
+  padding: 10px;
+}
+
+.postImg {
+  width: 500px;
+  height: auto;
+}
+
+/* NEW POST FORM */
+#newPostPopUp {
+  display: none;
+  position: absolute;
+  height: 400px;
+  border-radius: 12px;
+  background-color: var(--secondary-background);
+  color: var(--text-primary);
+  margin-left: auto; 
+  margin-right: auto;
+  top: 100px;
+  left: 0;
+  right: 0;
+  width: 500px;
+  z-index: 2;
+}
+
+#title, #body {
+  outline: none;
+  border:none;
+  background-image:none;
+  background-color:transparent;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  background-color: var(--secondary-background);
+  color: var(--text-primary);
+  display: block;
+  margin: 30px;
+}
+
+#title::placeholder, #body::placeholder {
+  color: var(--faded);
+}
+
+#title {
+  font-size: 2em;
+}
+
+#body {
+  font-size: 1.4em;
+}
+
+#newPostUserImg {
+  height: 85px;
+  width: 85px;
+  position: absolute;
+  left: -110px;
+  border-radius: 12px;
+}
+
+#mainProfileImg, .userProfile {
+  height: 85px;
+  width: 85px;
+  margin-left: 120px;
+  margin-right: 20px;
+}
+
+.userProfile {
+  position: sticky;
+  top: 50px;
+  margin-top: 15px;
+}
+
+.newPostImg {
+  width: 80%;
+  margin: 5px;
+}
+
+#posts {
+  color: var(--text-primary);
+}
+
+.post {
+  width: 500px;
+  margin-top: 15px;
+}
+
+.post, .postHeader {
+  background-color: var(--secondary-background);
+  border-radius: 12px;
+}
+
+.postHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  padding: 10px;
+}
+
+.postTitle {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.postBody {
+  font-size: 1.5em;
+}
+
+.postAuthor {
+  font-weight: bold;
+  padding: 5px;
+}
+
+#homeNewBlogs {
+  margin-right: 50px;
+}
+
+#inboxContent {
+  padding: 100px;
+  color: var(--text-primary);
+  height: 100vh;
+}
+
+.postIconsContainer {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  border-top: .5px solid var(--text-primary);
+  padding-top: 20px;
+}
+
+.postIcons, .liked, .like {
+  width: 30px;
+  height: 30px;
+  padding: 10px;
+}
+
+.postIcons:hover, .liked:hover, .like:hover {
+  cursor: pointer;
+}
+
+.postIcons:hover + .postIconInfo, .like:hover + .postIconInfo, .liked:hover + .postIconInfo {
+  display: block;
+}
+
+.postIconInfo {
+  position: absolute;
+  display: none;
+}
+
+.followBtn {
+  border-radius: 8px;
+  background-color: var(--accent);
+  color: white;
+  border-style: none;
+  height: min-content;
+  padding: 4px;
+}
+
+.followBtn:hover {
+  background-color: var(--background);
+  color: var(--accent);
+}
+
+.newBlogsContainer {
+  height: 400px;
+  color: var(--accent);
+  text-align: left;
+  margin: 10px 0 10px 40px;
+}
+
+.newBlogsTitle {
+  border-bottom: .5px solid var(--accent);
+  font-weight: bold;
+}
