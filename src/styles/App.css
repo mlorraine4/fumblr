@@ -19,6 +19,7 @@
   text-align: center;
   background-color: var(--background);
   color: var(--text-primary);
+  min-height: calc(100vh - 40px);
 }
 
 .App-link {
@@ -79,7 +80,7 @@ img {
 }
 
 /* HOME PAGE */
-#content {
+#content, #followers {
   padding-top: 40px;
   margin-top: 40px;
 }
@@ -220,8 +221,6 @@ img {
 
 #inboxContent {
   padding: 100px;
-  color: var(--text-primary);
-  height: 100vh;
 }
 
 .postIconsContainer {
@@ -275,4 +274,18 @@ img {
 .newBlogsTitle {
   border-bottom: .5px solid var(--accent);
   font-weight: bold;
+}
+
+/* FOLLOWERS PAGE */
+
+#followers {
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.followerProfile {
+  height: 85px;
+  width: 85px;
+  border-radius: 12px;
 }

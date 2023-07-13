@@ -2,7 +2,10 @@ import "./styles/App.css";
 import React, { useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getFirebaseConfig, db } from "./firebase-config";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import AccountSettings from "./pages/AccountSettings";
 import Inbox from "./pages/Inbox";
@@ -12,6 +15,8 @@ import HomePage from "./pages/HomePage";
 import UserPosts from "./pages/UserPosts";
 import Header from "./pageElements/Header";
 import ProfileSettings from "./pages/ProfileSettings";
+import Followers from "./pages/Followers";
+import SavedPosts from "./pages/SavedPosts";
 
 /*                                              -----TO DO LIST-----
   1. notification functionality (user has new follower, user's post has a new like, user recieves new message)
@@ -30,12 +35,6 @@ function App() {
   const auth = getAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [theme, setTheme] = useState("default");
-  const [userFeed, setUserFeed] = useState("home");
-
-  function updateFeed(feed) {
-    console.log(feed);
-    setUserFeed(feed);
-  }
 
   // Observer for user sign in status.
   function initalizeFirebaseAuth() {
@@ -55,10 +54,10 @@ function App() {
   }
 
   function changeTheme() {
-    if (theme === 'default') {
-      setTheme('dark');
+    if (theme === "default") {
+      setTheme("dark");
     } else {
-      setTheme('default');
+      setTheme("default");
     }
   }
 
@@ -71,10 +70,7 @@ function App() {
       <HashRouter>
         <Header user={currentUser} />
         <Routes>
-          <Route
-            path={"/"}
-            element={<HomePage user={currentUser} />}
-          ></Route>
+          <Route path={"/"} element={<HomePage />}></Route>
           <Route
             path={"/fumblr/account/login"}
             element={<LogIn user={currentUser} />}
@@ -88,18 +84,23 @@ function App() {
             element={<AccountSettings user={currentUser} />}
           ></Route>
           <Route
-          // TODO: how to put user display name after blog?
+            // TODO: how to put user display name after blog?
             path={"/fumblr/settings/blog"}
-            element={<ProfileSettings user={currentUser} />}
+            element={<ProfileSettings />}
           ></Route>
-          <Route
-            path={"/fumblr/inbox"}
-            element={<Inbox user={currentUser} />}
-          ></Route>
+          <Route path={"/fumblr/inbox"} element={<Inbox />}></Route>
           <Route
             // TODO: how to make dynamic links using user name (want user = display name)
             path={"/fumblr/posts/user"}
-            element={<UserPosts user={currentUser} />}
+            element={<UserPosts />}
+          ></Route>
+          <Route
+            path={"/fumblr/account/followers"}
+            element={<Followers />}
+          ></Route>
+          <Route
+            path={"/fumblr/account/liked-posts"}
+            element={<SavedPosts />}
           ></Route>
         </Routes>
       </HashRouter>

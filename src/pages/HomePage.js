@@ -4,7 +4,15 @@ import NewPostPopUp from "../pageElements/NewPostPopUp";
 import PostsMain from "../pageElements/PostsMain";
 import NewBlogsToFollow from "../pageElements/NewBlogsToFollow";
 import { db, storage } from "../firebase-config";
-import { push, child, ref as dbRef, update, getDatabase, get } from "firebase/database";
+import {
+  push,
+  child,
+  ref as dbRef,
+  update,
+  getDatabase,
+  get,
+  onValue
+} from "firebase/database";
 import uniqid from "uniqid";
 import {
   ref as storageRef,
@@ -15,8 +23,12 @@ import like from "../images/like.png";
 import liked from "../images/liked.png";
 import { useState, useEffect } from "react";
 import UserPosts from "./UserPosts";
+import { getAuth } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-const HomePage = ({ user }) => {
+const HomePage = () => {
+  const auth = getAuth();
+  const [user, loading, error] = useAuthState(auth);
 
   // TODO: REMOVE THIS WHEN DONE ADDING POSTS BY OTHER USERS!
   function writeNewPost() {
@@ -84,10 +96,55 @@ const HomePage = ({ user }) => {
       });
   }
 
-  if (user !== null) {
+  function getUserProfilePic() {
+    const user = getAuth().currentUser;
+    const profileRef = dbRef(db, "profile-pictures/" + user.displayName);
+    onValue(profileRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log(data);
+      document.querySelector("#" + user.displayName).src = data.photoURL;
+    });
+  }
+
+  // Saves new profile picture to firebase database.
+  function saveProfilePicture(photoURL = "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/profileImgs%2FN8i95WIgBYckPhENmbKwVKnjhJt1%2FuserProfileImg?alt=media&token=2e790913-2c7d-4024-aec6-14f9ac1c3069") {
+    // const user = getAuth().currentUser;
+    const displayName = "stickyfrogs"
+
+    const data = {
+      user: displayName,
+      photoURL: photoURL,
+    };
+
+    const updates = {};
+    updates["/profile-pictures/" + displayName] = data;
+
+    // Writes data simutaneoulsy in database.
+    update(dbRef(db), updates)
+      .then(() => {
+        // Data saved successfully!
+        console.log("info saved");
+      })
+      .catch((error) => {
+        // The write failed...
+        console.log(error);
+      });
+  }
+
+
+useEffect(() => {
+    if (loading) {
+      document.querySelector("#content").innerHTML = "Loading . . .";
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    saveProfilePicture();
+  }, []);
+
+  if (user) {
     return (
       <>
-        {/* <Header user={user}/> */}
         <div id="content">
           <NewPostPopUp user={user} />
           <div style={{ display: "flex" }}>
@@ -104,10 +161,10 @@ const HomePage = ({ user }) => {
         </div>
       </>
     );
-  } else {
+  }
+  if (!user) {
     return (
       <>
-        {/* <Header user={user} /> */}
         <div id="content">User is logged out.</div>
       </>
     );

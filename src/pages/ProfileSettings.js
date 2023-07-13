@@ -5,8 +5,14 @@ import {
 } from "firebase/storage";
 import { storage } from "../firebase-config";
 import { updateProfile, getAuth } from "firebase/auth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-const ProfileSettings = ({user}) => {
+const ProfileSettings = () => {
+  const navigate = useNavigate();
+  const auth = getAuth();
+  const [user, loading, error] = useAuthState(auth);
   // TODO: this page: fumblr/settings/blog/{displayName}
   // TODO: display new photo before saving it
   // the pathway for user profile images on storage: profileImgs/userid/userProfileImg
@@ -57,7 +63,6 @@ const ProfileSettings = ({user}) => {
 
   // Updates name and photo for current user.
   function updateUserProfile(photoURL) {
-    const auth = getAuth();
     updateProfile(auth.currentUser, {
       photoURL: photoURL,
     })
@@ -74,6 +79,17 @@ const ProfileSettings = ({user}) => {
         // ...
       });
   }
+
+  useEffect(() => {
+    if (loading) {
+      document.querySelector("#content").innerHTML = "Loading . . .";
+      return;
+    }
+    if (user) {
+    }
+    if (!user) return navigate("/fumblr/account/login");
+  }, [user, loading]);
+
   return (
     <div id="content">
       <label htmlFor="profileInput">choose profile image</label>
@@ -84,7 +100,7 @@ const ProfileSettings = ({user}) => {
         onChange={getImg}
       ></input>
       <div id="profileImg"></div>
-      <img src={user.photoURL}></img>
+      <img src={user.photoURL} className=""></img>
     </div>
   );
 };

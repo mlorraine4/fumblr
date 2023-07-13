@@ -1,10 +1,18 @@
 import Button from "../Button";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import {
+  getAuth,
+  setPersistence,
+  signInWithEmailAndPassword,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { useEffect } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-const LogIn = ({ user }) => {
+const LogIn = () => {
   const navigate = useNavigate();
+  const auth = getAuth();
+  const [user, loading, error] = useAuthState(auth);
 
   function submitLogIn(e) {
     e.preventDefault();
@@ -15,7 +23,6 @@ const LogIn = ({ user }) => {
 
   // Sign in user with email and password.
   function signInUserWithEmail(email, password) {
-    const auth = getAuth();
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
@@ -34,10 +41,8 @@ const LogIn = ({ user }) => {
   }
 
   useEffect(() => {
-    console.log(user);
-    // Checks if user is already logged in, if so redirects to dashboard.
-    if (user !== null) {
-      navigate("/");
+    if (!user) {
+      return navigate("/");
     }
   }, [user]);
 

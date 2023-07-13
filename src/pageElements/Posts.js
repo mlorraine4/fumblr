@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { saveFollow, addLike, removeLike } from "../HelperFunctions";
 import like from "../images/like.png";
 import liked from "../images/liked.png";
@@ -6,7 +7,7 @@ import repost from "../images/exchange.png";
 import share from "../images/send.png";
 import comment from "../images/chat.png";
 
-const Posts = ({ posts, followers }) => {
+const Posts = ({ posts, followers}) => {
 
   // Saves user like or unlike of a post.
   function toggleLikedStatus(e, post) {

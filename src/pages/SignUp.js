@@ -159,9 +159,8 @@ const SignUp = ({ user }) => {
   }
 
   useEffect(() => {
-    // Checking if user has already verified their email address. If so, redirects back to their dashboard.
-    if (user !== null && user.emailVerified) {
-      navigate("/");
+    if (user && user.emailVerified) {
+      return navigate("/");
     }
   }, [navigate, user]);
 
@@ -181,7 +180,7 @@ const SignUp = ({ user }) => {
           <div id="userNameError"></div>
           <Button type="submit">Sign Up</Button>
           <Button>x</Button>
-          <div id="signUpError">error message</div>
+          <div id="signUpError"></div>
         </form>
         <>
           <div>Have an account?</div>

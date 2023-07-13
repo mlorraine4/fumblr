@@ -47,7 +47,7 @@ const Header = ({ user}) => {
               className="navBarIcons"
               onClick={toggleAccountDisplay}
             ></img>
-            <AccountPopUp user={user}/>
+            <AccountPopUp user={user} toggleDisplay={toggleAccountDisplay}/>
           </div>
           <div style={{ position: "relative" }}>
             <img

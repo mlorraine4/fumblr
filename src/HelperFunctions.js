@@ -1,8 +1,14 @@
 import { db } from "./firebase-config";
-import { ref, update, onValue, increment } from "firebase/database";
+import { ref, update, onValue, increment, get } from "firebase/database";
 import { updateEmail, updateProfile, getAuth, signOut } from "firebase/auth";
 
 /* ---------FIREBASE FUNCTIONS-------- */
+
+// TODO: When updating user profile picture, need to save it in 
+// 1. firebase auth
+// 2. user-posts/user/authorPic:
+// 3. posts/user/authorPic:
+// 4. profile-pictures/user/photoURL
 
 // Sign out user.
 export function signOutUser() {
@@ -57,10 +63,9 @@ export function getUserLinkedProfile() {
 // Updates name and photo for current user.
 export function updateUserProfile(displayName, photoURL) {
   const auth = getAuth();
-
   updateProfile(auth.currentUser, {
-    displayName: "Jane Q. User",
-    photoURL: "https://example.com/jane-q-user/profile.jpg",
+    displayName: displayName,
+    photoURL: photoURL,
   })
     .then(() => {
       // Profile updated!
@@ -70,6 +75,55 @@ export function updateUserProfile(displayName, photoURL) {
       // An error occurred
       // ...
     });
+}
+
+export function updateUserProfilePicture(photoURL) {
+  const auth = getAuth();
+  updateProfile(auth.currentUser, {
+    photoURL: photoURL,
+  })
+    .then(() => {
+      // Profile updated!
+      // ...
+      saveProfilePicture(photoURL);
+    })
+    .catch((error) => {
+      // An error occurred
+      // ...
+    });
+}
+
+// Saves new profile picture to firebase database.
+function saveProfilePicture(photoURL) {
+  const user = getAuth().currentUser;
+
+  const data = {
+    user: user.displayName,
+    photoURL: photoURL,
+  };
+
+  const updates = {};
+  updates["/profile-pictures/" + user.displayName] = data;
+
+  // Writes data simutaneoulsy in database.
+  update(ref(db), updates)
+    .then(() => {
+      // Data saved successfully!
+      console.log("info saved");
+    })
+    .catch((error) => {
+      // The write failed...
+      console.log(error);
+    });
+}
+
+export function getUserProfilePic() {
+  const user = getAuth().currentUser;
+  const profileRef = ref(db, "profile-pictures/" + user.displayName);
+  onValue(profileRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log(data);
+  });
 }
 
 // Updates user's email address.
@@ -88,27 +142,28 @@ export function updateUserEmail(email) {
 }
 
 // After user follows another, saves info in database.
-export function saveFollow(newUser) {
+export function saveFollow(newUser, photoURL) {
   // user is current user, wanting to follow new user
   const auth = getAuth();
   const user = auth.currentUser;
-  const uid = user.uid;
-  const newid = "acoolblogID";
 
-  // A post entry.
+  // Current user's information.
   const userData = {
-    uid: uid,
-    displayName: "jigglypoof",
+    user: user.displayName,
+    photoURL: user.photoURL,
   };
 
+  // New blog info current user wants to follow.
   const newUserData = {
-    uid: newid,
-    displayName: "acoolblog",
+    user: newUser,
+    photoURL: photoURL,
   };
 
   const updates = {};
-  updates["/user-info/" + uid + "/following/" + newid] = newUserData;
-  updates["/user-info/" + newid + "/followers/" + uid] = userData;
+  updates["/user-info/" + user.displayName + "/following/" + newUser] =
+    newUserData;
+  updates["/user-info/" + newUser + "/followers/" + user.displayName] =
+    userData;
 
   // Writes data simutaneoulsy in database.
   update(ref(db), updates)

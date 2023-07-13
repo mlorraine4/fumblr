@@ -58,6 +58,7 @@ const PostsMain = ({ user }) => {
 
   //  Retreives who a user is following from firebase.
   function getFollowers() {
+    console.log(user);
     const dbRef = ref(getDatabase());
     get(child(dbRef, "user-info/" + user.displayName + "/following"))
       .then((snapshot) => {
