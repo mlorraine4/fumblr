@@ -17,7 +17,6 @@ const Followers = () => {
     get(child(dbRef, "user-info/" + user.displayName + "/following"))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          console.log(snapshot.val());
           iterateFollowers(snapshot.val());
         } else {
           console.log("No data available");
@@ -42,10 +41,11 @@ const Followers = () => {
             photoURL: data.photoURL,
           });
         }
+        if (followersArray.length === followers.length) {
+          setFollowers(followersArray);
+        }
       });
     });
-    console.log(followersArray);
-    setFollowers(followersArray);
   }
 
   useEffect(() => {
@@ -55,10 +55,16 @@ const Followers = () => {
     if (!user) return navigate("/fumblr/account/login");
   }, [user, navigate, loading]);
 
+  useEffect(() => {
+    if (user) {
+      getFollowers();
+    }
+  }, [user]);
+
   if (user) {
-    getFollowers();
     return (
       <div id="followers">
+        <div>Your Followers:</div>
         {followers.map((follower, index) => {
           return (
             <div key={index} style={{ display: "flex" }}>
@@ -69,9 +75,7 @@ const Followers = () => {
         })}
       </div>
     );
-  } else return (
-    <div id="followers"></div>
-  )
+  } else return <div id="followers"></div>;
 };
 
 export default Followers;

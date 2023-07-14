@@ -5,17 +5,28 @@ import {
 } from "firebase/storage";
 import { storage } from "../firebase-config";
 import { updateProfile, getAuth } from "firebase/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
+import edit from "../images/edit.png";
+import { update } from "firebase/database";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
+  const [file, setFile] = useState("");
+
   // TODO: this page: fumblr/settings/blog/{displayName}
   // TODO: display new photo before saving it
   // the pathway for user profile images on storage: profileImgs/userid/userProfileImg
+
+  // ON PROFILE CHANGE: (database)
+  // 1. update profile-pictures/userdisplayname/photoURL
+  // 2. update user-posts/userdisplayname/(every child) ==> postID/authorPic
+  // 3. send every child post id in order to save posts/postID/authorPic
+  // 4. update (storage) profileImgs/userid/userProfileImg
+
   function getImg() {
     let file = document.getElementById("profileInput").files[0];
     let reader = new FileReader();
@@ -23,7 +34,10 @@ const ProfileSettings = () => {
     reader.readAsDataURL(file);
 
     reader.onload = function () {
-      downloadImg(file);
+      // downloadImg(file);
+      const imgSrc = reader.result;
+      document.querySelector("#userProfileImg").src = imgSrc;
+      setFile(file);
     };
 
     reader.onerror = function () {
@@ -31,7 +45,7 @@ const ProfileSettings = () => {
     };
   }
 
-  function downloadImg(file) {
+  function downloadImg() {
     const uid = user.uid;
 
     const imgFilePathName = "profileImgs/" + uid + "/userProfileImg";
@@ -70,9 +84,7 @@ const ProfileSettings = () => {
         // Profile updated!
         // ...
         console.log("profile updated");
-        // TODO: find a better way to update only images?
-        // Reloads page to show updated profile image.
-        document.location.reload();
+        updateDB(photoURL);
       })
       .catch((error) => {
         // An error occurred
@@ -80,29 +92,62 @@ const ProfileSettings = () => {
       });
   }
 
-  useEffect(() => {
-    if (loading) {
-      document.querySelector("#content").innerHTML = "Loading . . .";
-      return;
-    }
-    if (user) {
-    }
-    if (!user) return navigate("/fumblr/account/login");
-  }, [user, loading]);
+  function updateDB() {
+    // TODO: write fnc
+  }
 
-  return (
-    <div id="content">
-      <label htmlFor="profileInput">choose profile image</label>
-      <input
-        type="file"
-        id="profileInput"
-        style={{ visibility: "hidden" }}
-        onChange={getImg}
-      ></input>
-      <div id="profileImg"></div>
-      <img src={user.photoURL} className=""></img>
-    </div>
-  );
+  function toggleEdit() {
+    document.querySelector("#editBtn").classList.toggle("hide");
+    document.querySelector("#saveBtn").classList.toggle("hide");
+    document.querySelector("#cancelBtn").classList.toggle("hide");
+    document.querySelector("#profileInput").classList.toggle("hide");
+  }
+
+  useEffect(() => {
+    if (!user) return navigate("/fumblr/account/login");
+  }, [user, navigate]);
+
+  if (loading) {
+    return <div id="content">Loading . . .</div>;
+  } else {
+    return (
+      <div id="content">
+        <div>
+          <button id="editBtn" onClick={toggleEdit}>
+            edit appearance
+          </button>
+          <button id="saveBtn" className="hide">
+            save
+          </button>
+          <button id="cancelBtn" className="hide" onClick={toggleEdit}>
+            cancel
+          </button>
+          <div style={{ position: "relative", width: "100px", margin: "auto" }}>
+            <div
+              id="profileInput"
+              style={{ position: "absolute", left: "40px", top: "40px" }}
+              className="hide"
+            >
+              <label htmlFor="profileInput">
+                <div className="editProfileBackground">
+                  <img src={edit} className="editProfileIcon" alt=""></img>
+                </div>
+              </label>
+              <input
+                type="file"
+                id="profileInput"
+                style={{ visibility: "hidden" }}
+                onChange={getImg}
+              ></input>
+            </div>
+            <img id="userProfileImg" src={user.photoURL} alt=""></img>
+          </div>
+          <div>Title</div>
+          <div>Description</div>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default ProfileSettings;

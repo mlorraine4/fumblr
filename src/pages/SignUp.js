@@ -10,6 +10,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ref, update, child, get } from "firebase/database";
 import { db } from "../firebase-config";
 
+// TODO: save default profile pic on creating new user
+
 const SignUp = ({ user }) => {
   const navigate = useNavigate();
 

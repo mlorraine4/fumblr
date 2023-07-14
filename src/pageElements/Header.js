@@ -3,8 +3,12 @@ import logo from "../images/letter-f.png";
 import Button from "../Button";
 import NotificationsPopUp from "./NotificationsPopUp";
 import AccountPopUp from "./AccountPopUp";
-const images = require.context("../images/headerIcons", true);
-const imageList = images.keys().map((image) => images(image));
+import home from "../images/home.png";
+import profile from "../images/user.png";
+import bell from "../images/bell.png";
+import message from "../images/envelope.png";
+import edit from "../images/edit.png";
+
 
 const Header = ({ user}) => {
   
@@ -33,37 +37,39 @@ const Header = ({ user}) => {
           <img id="logo" alt="" src={logo}></img>
           <input placeholder="Search Fumblr" id="searchBar"></input>
         </div>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", width: "250px", justifyContent: "space-evenly" }}>
           <Link to="/">
-            <img src={imageList[0]} alt="" className="navBarIcons"></img>
+            <img src={home} alt="" className="navBarIcons"></img>
           </Link>
           <Link to="/fumblr/inbox">
-            <img src={imageList[1]} alt="" className="navBarIcons"></img>
+            <img src={message} alt="" className="navBarIcons"></img>
           </Link>
           <div style={{ position: "relative" }}>
             <img
-              src={imageList[2]}
+              src={profile}
               alt=""
               className="navBarIcons"
               onClick={toggleAccountDisplay}
             ></img>
-            <AccountPopUp user={user} toggleDisplay={toggleAccountDisplay}/>
+            <AccountPopUp user={user} toggleDisplay={toggleAccountDisplay} />
           </div>
           <div style={{ position: "relative" }}>
             <img
-              src={imageList[3]}
+              src={bell}
               alt=""
               className="navBarIcons"
               onClick={toggleNotificationsDisplay}
             ></img>
             <NotificationsPopUp user={user} />
           </div>
-          <img
-            src={imageList[4]}
-            alt=""
-            className="navBarIcons"
-            onClick={writePost}
-          ></img>
+          <div id="headerEditBackground">
+            <img
+            style={{height: "30px", width: "30px"}}
+              src={edit}
+              alt=""
+              onClick={writePost}
+            ></img>
+          </div>
         </div>
       </div>
     );

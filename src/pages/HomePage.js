@@ -139,7 +139,7 @@ useEffect(() => {
   }, [loading]);
 
   useEffect(() => {
-    saveProfilePicture();
+    // saveProfilePicture();
   }, []);
 
   if (user) {

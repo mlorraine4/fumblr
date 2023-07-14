@@ -14,7 +14,7 @@ const NewPostButtons = ({ user }) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Link to="/fumblr/account/settings">
+      <Link to="fumblr/settings/blog">
         <img id="mainProfileImg" alt="" src={user.photoURL}></img>
       </Link>
       <div id="newPostButtons">

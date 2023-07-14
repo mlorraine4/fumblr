@@ -96,7 +96,7 @@ const UserPosts = () => {
       getFollowers(user.displayName);
     }
     if (!user) navigate("/fumblr/account/login");
-  }, [user, loading, followers]);
+  }, [user, getPosts, getFollowers]);
 
   if (loading) {
     return <div id="content">Loading . . .</div>;
