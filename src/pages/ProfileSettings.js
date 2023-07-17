@@ -3,13 +3,19 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { storage } from "../firebase-config";
+import {
+  ref as dbRef,
+  update,
+  get,
+  child,
+  getDatabase,
+} from "firebase/database";
+import { db, storage } from "../firebase-config";
 import { updateProfile, getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import edit from "../images/edit.png";
-import { update } from "firebase/database";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -27,24 +33,27 @@ const ProfileSettings = () => {
   // 3. send every child post id in order to save posts/postID/authorPic
   // 4. update (storage) profileImgs/userid/userProfileImg
 
+  // Read image file selected from input and display new img for user.
   function getImg() {
     let file = document.getElementById("profileInput").files[0];
     let reader = new FileReader();
 
-    reader.readAsDataURL(file);
+    if (file) {
+      reader.readAsDataURL(file);
 
-    reader.onload = function () {
-      // downloadImg(file);
-      const imgSrc = reader.result;
-      document.querySelector("#userProfileImg").src = imgSrc;
-      setFile(file);
-    };
+      reader.onload = function () {
+        const imgSrc = reader.result;
+        document.querySelector("#userProfileImg").src = imgSrc;
+        setFile(file);
+      };
 
-    reader.onerror = function () {
-      console.log(reader.error);
-    };
+      reader.onerror = function () {
+        console.log(reader.error);
+      };
+    }
   }
 
+  // Save image to firebase storage.
   function downloadImg() {
     const uid = user.uid;
 
@@ -75,7 +84,7 @@ const ProfileSettings = () => {
       });
   }
 
-  // Updates name and photo for current user.
+  // Update photo url for firebase auth user.
   function updateUserProfile(photoURL) {
     updateProfile(auth.currentUser, {
       photoURL: photoURL,
@@ -84,7 +93,7 @@ const ProfileSettings = () => {
         // Profile updated!
         // ...
         console.log("profile updated");
-        updateDB(photoURL);
+        getUserPostIDs(photoURL);
       })
       .catch((error) => {
         // An error occurred
@@ -92,15 +101,58 @@ const ProfileSettings = () => {
       });
   }
 
-  function updateDB() {
-    // TODO: write fnc
+  // Get all user posts' ids from database.
+  function getUserPostIDs() {
+    const url =
+      "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/profileImgs%2FN8i95WIgBYckPhENmbKwVKnjhJt1%2FuserProfileImg?alt=media&token=2e790913-2c7d-4024-aec6-14f9ac1c3069";
+    const ref = dbRef(getDatabase());
+    get(child(ref, "user-posts/" + user.displayName))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          updateDB(url, snapshot.val());
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  // Update firebase database with new user photo.
+  function updateDB(url, posts) {
+    let ids = Object.keys(posts);
+    const updates = {};
+    updates["/profile-pictures/" + user.displayName + "/photoURL"] = url;
+
+    ids.forEach((id) => {
+      updates["/user-posts/" + user.displayName + "/" + id + "/authorPic"] =
+        url;
+      updates["posts/" + id + "/authorPic"] = url;
+    });
+
+    update(dbRef(db), updates)
+      .then(() => {
+        // Data saved successfully!
+        console.log("info saved!");
+      })
+      .catch((error) => {
+        // The write failed...
+        console.log(error);
+      });
   }
 
   function toggleEdit() {
     document.querySelector("#editBtn").classList.toggle("hide");
     document.querySelector("#saveBtn").classList.toggle("hide");
     document.querySelector("#cancelBtn").classList.toggle("hide");
-    document.querySelector("#profileInput").classList.toggle("hide");
+    document.querySelector("#inputContainer").classList.toggle("hide");
+  }
+
+  function cancelUpload() {
+    toggleEdit();
+    document.querySelector("#userProfileImg").src = user.photoURL;
+    setFile("");
   }
 
   useEffect(() => {
@@ -116,15 +168,15 @@ const ProfileSettings = () => {
           <button id="editBtn" onClick={toggleEdit}>
             edit appearance
           </button>
-          <button id="saveBtn" className="hide">
+          <button id="saveBtn" className="hide" onClick={downloadImg}>
             save
           </button>
-          <button id="cancelBtn" className="hide" onClick={toggleEdit}>
+          <button id="cancelBtn" className="hide" onClick={cancelUpload}>
             cancel
           </button>
           <div style={{ position: "relative", width: "100px", margin: "auto" }}>
             <div
-              id="profileInput"
+              id="inputContainer"
               style={{ position: "absolute", left: "40px", top: "40px" }}
               className="hide"
             >
@@ -140,10 +192,16 @@ const ProfileSettings = () => {
                 onChange={getImg}
               ></input>
             </div>
-            <img id="userProfileImg" src={user.photoURL} alt=""></img>
+            <img
+              id="userProfileImg"
+              className="cover"
+              src={user.photoURL}
+              alt=""
+            ></img>
           </div>
           <div>Title</div>
           <div>Description</div>
+          <button onClick={getUserPostIDs}>click me</button>
         </div>
       </div>
     );

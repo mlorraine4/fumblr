@@ -322,3 +322,7 @@ img {
   width: 100px;
   height: 100px;
 }
+
+.cover {
+  object-fit: cover;
+}

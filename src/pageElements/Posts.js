@@ -40,7 +40,7 @@ const Posts = ({ posts, followers}) => {
       {posts.map((post) => {
         return (
           <div style={{ display: "flex", marginTop: "50px" }} key={post.id}>
-            <img src={post.authorPic} className="userProfile"></img>
+            <img src={post.authorPic} className="userProfile cover"></img>
             <div className="post">
               <div className="postHeader">
                 <div style={{ display: "flex", alignItems: "center" }}>
