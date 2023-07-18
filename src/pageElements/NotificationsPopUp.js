@@ -1,4 +1,3 @@
-import Button from "../Button";
 
 const NotificationsPopUp = ({user}) => {
   return (

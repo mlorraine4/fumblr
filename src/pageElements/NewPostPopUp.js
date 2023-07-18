@@ -100,15 +100,23 @@ const NewPostPopUp = ({ user }) => {
       });
   }
 
+  function togglePostForm() {
+    document.getElementById("newPostPopUp").classList.toggle("hide");
+    document.getElementById("content").classList.toggle("fade");
+    document.getElementById("content").classList.toggle("stop-scrolling");
+    document.getElementById("header").classList.toggle("fade");
+    document.getElementById("postForm").reset();
+  }
+
   return (
-    <div id="newPostPopUp">
+    <div id="newPostPopUp" className="hide">
       <img src={user.photoURL} id="newPostUserImg" alt=""></img>
       <form id="postForm">
         <input id="title" placeholder="title"></input>
         <input id="body" placeholder="Your text here"></input>
         <input type="file" id="fileInput"></input>
         <div id="formError"></div>
-        <Button>cancel</Button>
+        <button onClick={togglePostForm}>cancel</button>
         <Button onClick={submitForm}>post</Button>
       </form>
     </div>

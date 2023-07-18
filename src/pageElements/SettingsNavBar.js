@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 
 const SettingsNavBar = () => {
     return (
-      <div>
-        <div>Account</div>
+      <div id="settingsNavBar">
+        <div className="navBarComponent">Account</div>
         <Link to={"/fumblr/settings/blog"}>
-          <div>Blog Appearance</div>
+          <div className="navBarComponent">Blog Appearance</div>
         </Link>
-        <div>Dashboard</div>
-        <div>Notifications</div>
-        <div>Payments & Purchases</div>
+        <div className="navBarComponent">Dashboard</div>
+        <div className="navBarComponent">Notifications</div>
+        <div className="navBarComponent">Payments & Purchases</div>
       </div>
     );
 }

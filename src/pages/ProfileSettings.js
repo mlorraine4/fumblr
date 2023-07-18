@@ -16,25 +16,20 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import edit from "../images/edit.png";
+import SettingsNavBar from "../pageElements/SettingsNavBar";
+
+// TODO: add functionality for updating title/description for user's profile
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
   const [file, setFile] = useState("");
-
-  // TODO: this page: fumblr/settings/blog/{displayName}
-  // TODO: display new photo before saving it
-  // the pathway for user profile images on storage: profileImgs/userid/userProfileImg
-
-  // ON PROFILE CHANGE: (database)
-  // 1. update profile-pictures/userdisplayname/photoURL
-  // 2. update user-posts/userdisplayname/(every child) ==> postID/authorPic
-  // 3. send every child post id in order to save posts/postID/authorPic
-  // 4. update (storage) profileImgs/userid/userProfileImg
+  const [title, setTitle] = useState("Title");
+  const [description, setDescription] = useState("Description");
 
   // Read image file selected from input and display new img for user.
-  function getImg() {
+  async function getImg() {
     let file = document.getElementById("profileInput").files[0];
     let reader = new FileReader();
 
@@ -53,8 +48,55 @@ const ProfileSettings = () => {
     }
   }
 
+  async function saveEdit() {
+    console.log("save button clicked");
+    if (file !== "") {
+      console.log("downloading file");
+      // await downloadImg();
+      setFile("");
+    }
+    if (title !== "Title" && title !== "") {
+      saveTitle();
+    }
+    if (description !== "Description" && description !== "") {
+      saveDescription();
+    }
+  }
+
+  async function saveTitle() {
+    console.log(title);
+    // const updates = {};
+    // updates["/profile-info/" + user.displayName + "/title"] = title;
+
+    // update(dbRef(db), updates)
+    //   .then(() => {
+    //     // Data saved successfully!
+    //     console.log("info saved!");
+    //   })
+    //   .catch((error) => {
+    //     // The write failed...
+    //     console.log(error);
+    //   });
+  }
+
+  async function saveDescription() {
+    console.log(description);
+    // const updates = {};
+    // updates["/profile-info/" + user.displayName + "/description"] = description;
+
+    // update(dbRef(db), updates)
+    //   .then(() => {
+    //     // Data saved successfully!
+    //     console.log("info saved!");
+    //   })
+    //   .catch((error) => {
+    //     // The write failed...
+    //     console.log(error);
+    //   });
+  }
+
   // Save image to firebase storage.
-  function downloadImg() {
+  async function downloadImg() {
     const uid = user.uid;
 
     const imgFilePathName = "profileImgs/" + uid + "/userProfileImg";
@@ -73,7 +115,7 @@ const ProfileSettings = () => {
   }
 
   // Get post's img url from firebase storage.
-  function getImgUrl(imgFilePath) {
+  async function getImgUrl(imgFilePath) {
     getDownloadURL(storageRef(storage, imgFilePath))
       .then((url) => {
         console.log("got img url");
@@ -85,7 +127,7 @@ const ProfileSettings = () => {
   }
 
   // Update photo url for firebase auth user.
-  function updateUserProfile(photoURL) {
+  async function updateUserProfile(photoURL) {
     updateProfile(auth.currentUser, {
       photoURL: photoURL,
     })
@@ -102,9 +144,7 @@ const ProfileSettings = () => {
   }
 
   // Get all user posts' ids from database.
-  function getUserPostIDs() {
-    const url =
-      "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/profileImgs%2FN8i95WIgBYckPhENmbKwVKnjhJt1%2FuserProfileImg?alt=media&token=2e790913-2c7d-4024-aec6-14f9ac1c3069";
+  async function getUserPostIDs(url) {
     const ref = dbRef(getDatabase());
     get(child(ref, "user-posts/" + user.displayName))
       .then((snapshot) => {
@@ -120,7 +160,7 @@ const ProfileSettings = () => {
   }
 
   // Update firebase database with new user photo.
-  function updateDB(url, posts) {
+  async function updateDB(url, posts) {
     let ids = Object.keys(posts);
     const updates = {};
     updates["/profile-pictures/" + user.displayName + "/photoURL"] = url;
@@ -147,34 +187,79 @@ const ProfileSettings = () => {
     document.querySelector("#saveBtn").classList.toggle("hide");
     document.querySelector("#cancelBtn").classList.toggle("hide");
     document.querySelector("#inputContainer").classList.toggle("hide");
+    document.querySelector("#displayDescription").classList.toggle("hide");
+    document.querySelector("#displayDescription").classList.toggle("show");
+    document.querySelector("#editDescription").classList.toggle("hide");
+    document.querySelector("#editDescription").classList.toggle("show");
   }
 
   function cancelUpload() {
     toggleEdit();
     document.querySelector("#userProfileImg").src = user.photoURL;
     setFile("");
+    if (title === "") {
+      setTitle("Title");
+    }
+    if (description === "") {
+      setDescription("Description");
+    }
+  }
+
+  function updateTitle(e) {
+    setTitle(e.target.value);
+    console.log(title);
+  }
+
+  function updateDescription(e) {
+    setDescription(e.target.value);
   }
 
   useEffect(() => {
     if (!user) return navigate("/fumblr/account/login");
   }, [user, navigate]);
 
+  useEffect(() => {
+    if (
+      (description !== "Description" && description !== "") ||
+      file !== "" ||
+      (title !== "Title" && title !== "")
+    ) {
+      console.log("button clickable");
+      document.getElementById("saveBtn").disabled = false;
+      console.log(document.getElementById("saveBtn").disabled);
+    } else {
+      console.log("button unclickable");
+      document.getElementById("saveBtn").disabled = true;
+      console.log(document.getElementById("saveBtn").disabled);
+    }
+  }, [file, title, description]);
+
   if (loading) {
     return <div id="content">Loading . . .</div>;
   } else {
     return (
-      <div id="content">
-        <div>
-          <button id="editBtn" onClick={toggleEdit}>
-            edit appearance
-          </button>
-          <button id="saveBtn" className="hide" onClick={downloadImg}>
-            save
-          </button>
-          <button id="cancelBtn" className="hide" onClick={cancelUpload}>
-            cancel
-          </button>
-          <div style={{ position: "relative", width: "100px", margin: "auto" }}>
+      <div id="content" style={{ display: "flex", height: "calc(99vh)" }}>
+        <div id="editProfileContainer">
+          <div className="btnContainer">
+            <button id="editBtn" onClick={toggleEdit}>
+              Edit Appearance
+            </button>
+          </div>
+          <div className="btnContainer">
+            <button id="saveBtn" disabled className="hide" onClick={saveEdit}>
+              Save
+            </button>
+            <button id="cancelBtn" className="hide" onClick={cancelUpload}>
+              Cancel
+            </button>
+          </div>
+          <div
+            style={{
+              position: "relative",
+              width: "100px",
+              margin: "50px auto 50px auto",
+            }}
+          >
             <div
               id="inputContainer"
               style={{ position: "absolute", left: "40px", top: "40px" }}
@@ -199,10 +284,29 @@ const ProfileSettings = () => {
               alt=""
             ></img>
           </div>
-          <div>Title</div>
-          <div>Description</div>
-          <button onClick={getUserPostIDs}>click me</button>
+          <div id="displayDescription" className="show">
+            <div id="profileTitle" className="editProfile">
+              {title}
+            </div>
+            <div id="profileDescription" className="editProfile">
+              {description}
+            </div>
+          </div>
+          <div id="editDescription" className="hide">
+            <input
+              placeholder="Title"
+              onChange={updateTitle}
+              className="editProfile"
+              id="titleInput"
+            ></input>
+            <input
+              placeholder="Description"
+              onChange={updateDescription}
+              className="editProfile"
+            ></input>
+          </div>
         </div>
+        <SettingsNavBar />
       </div>
     );
   }

@@ -68,7 +68,7 @@ const Followers = () => {
         {followers.map((follower, index) => {
           return (
             <div key={index} style={{ display: "flex" }}>
-              <img src={follower.photoURL} className="followerProfile"></img>
+              <img src={follower.photoURL} className="followerProfile cover"></img>
               <div>{follower.user}</div>
             </div>
           );

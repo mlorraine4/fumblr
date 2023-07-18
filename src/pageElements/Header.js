@@ -8,10 +8,10 @@ import profile from "../images/user.png";
 import bell from "../images/bell.png";
 import message from "../images/envelope.png";
 import edit from "../images/edit.png";
+import { togglePostForm } from "../HelperFunctions";
+import NewPostPopUp from "./NewPostPopUp";
 
-
-const Header = ({ user}) => {
-  
+const Header = ({ user }) => {
   function toggleNotificationsDisplay() {
     if (!document.getElementById("accountPopUp").classList.contains("hide")) {
       document.getElementById("accountPopUp").classList.add("hide");
@@ -28,50 +28,80 @@ const Header = ({ user}) => {
     document.getElementById("accountPopUp").classList.toggle("hide");
   }
 
-  const writePost = () => {};
+  function hidePopUps() {
+    if (
+      !document.getElementById("notificationsPopUp").classList.contains("hide")
+    ) {
+      document.getElementById("notificationsPopUp").classList.add("hide");
+    }
+    if (!document.getElementById("accountPopUp").classList.contains("hide")) {
+      document.getElementById("accountPopUp").classList.add("hide");
+    }
+  }
 
   if (user !== null) {
     return (
-      <div id="header">
-        <div style={{ display: "flex" }}>
-          <img id="logo" alt="" src={logo}></img>
-          <input placeholder="Search Fumblr" id="searchBar"></input>
+      <>
+        <NewPostPopUp user={user} />
+        <div id="header">
+          <div style={{ display: "flex" }}>
+            <img id="logo" alt="" src={logo}></img>
+            <input placeholder="Search Fumblr" id="searchBar"></input>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              width: "250px",
+              justifyContent: "space-evenly",
+              marginRight: "20px"
+            }}
+          >
+            <Link to="/">
+              <img
+                src={home}
+                alt=""
+                className="navBarIcons"
+                onClick={hidePopUps}
+              ></img>
+            </Link>
+            <Link to="/fumblr/inbox">
+              <img
+                src={message}
+                alt=""
+                className="navBarIcons"
+                onClick={hidePopUps}
+              ></img>
+            </Link>
+            <div style={{ position: "relative" }}>
+              <img
+                src={profile}
+                alt=""
+                className="navBarIcons"
+                onClick={toggleAccountDisplay}
+              ></img>
+              <AccountPopUp user={user} toggleDisplay={toggleAccountDisplay} />
+            </div>
+            <div style={{ position: "relative" }}>
+              <img
+                src={bell}
+                alt=""
+                className="navBarIcons"
+                onClick={toggleNotificationsDisplay}
+              ></img>
+              <NotificationsPopUp user={user} />
+            </div>
+            <div id="headerEditBackground">
+              <img
+                style={{ height: "30px", width: "30px" }}
+                src={edit}
+                alt=""
+                id="headerNewPostIcon"
+                onClick={togglePostForm}
+              ></img>
+            </div>
+          </div>
         </div>
-        <div style={{ display: "flex", width: "250px", justifyContent: "space-evenly" }}>
-          <Link to="/">
-            <img src={home} alt="" className="navBarIcons"></img>
-          </Link>
-          <Link to="/fumblr/inbox">
-            <img src={message} alt="" className="navBarIcons"></img>
-          </Link>
-          <div style={{ position: "relative" }}>
-            <img
-              src={profile}
-              alt=""
-              className="navBarIcons"
-              onClick={toggleAccountDisplay}
-            ></img>
-            <AccountPopUp user={user} toggleDisplay={toggleAccountDisplay} />
-          </div>
-          <div style={{ position: "relative" }}>
-            <img
-              src={bell}
-              alt=""
-              className="navBarIcons"
-              onClick={toggleNotificationsDisplay}
-            ></img>
-            <NotificationsPopUp user={user} />
-          </div>
-          <div id="headerEditBackground">
-            <img
-            style={{height: "30px", width: "30px"}}
-              src={edit}
-              alt=""
-              onClick={writePost}
-            ></img>
-          </div>
-        </div>
-      </div>
+      </>
     );
   } else {
     return (

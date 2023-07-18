@@ -4,12 +4,6 @@ import { updateEmail, updateProfile, getAuth, signOut } from "firebase/auth";
 
 /* ---------FIREBASE FUNCTIONS-------- */
 
-// TODO: When updating user profile picture, need to save it in 
-// 1. firebase auth
-// 2. user-posts/user/authorPic:
-// 3. posts/user/authorPic:
-// 4. profile-pictures/user/photoURL
-
 // Sign out user.
 export function signOutUser() {
   const auth = getAuth();
@@ -60,7 +54,7 @@ export function getUserLinkedProfile() {
   }
 }
 
-// Updates name and photo for current user.
+// Update name and photo for current user.
 export function updateUserProfile(displayName, photoURL) {
   const auth = getAuth();
   updateProfile(auth.currentUser, {
@@ -93,8 +87,8 @@ export function updateUserProfilePicture(photoURL) {
     });
 }
 
-// Saves new profile picture to firebase database.
-function saveProfilePicture(photoURL) {
+// Save new profile picture to firebase database.
+export function saveProfilePicture(photoURL) {
   const user = getAuth().currentUser;
 
   const data = {
@@ -126,7 +120,7 @@ export function getUserProfilePic() {
   });
 }
 
-// Updates user's email address.
+// Update user's email address.
 export function updateUserEmail(email) {
   const auth = getAuth();
 
@@ -141,7 +135,7 @@ export function updateUserEmail(email) {
     });
 }
 
-// After user follows another, saves info in database.
+// After user follows another, save info in database.
 export function saveFollow(newUser, photoURL) {
   // user is current user, wanting to follow new user
   const auth = getAuth();
@@ -165,7 +159,7 @@ export function saveFollow(newUser, photoURL) {
   updates["/user-info/" + newUser + "/followers/" + user.displayName] =
     userData;
 
-  // Writes data simutaneoulsy in database.
+  // Write data simutaneoulsy in database.
   update(ref(db), updates)
     .then(() => {
       // Data saved successfully!
@@ -177,19 +171,16 @@ export function saveFollow(newUser, photoURL) {
     });
 }
 
-// Retrieves a post favorite count.
-export function getPostFavorites(postId, postElement) {
-  const favoriteCountRef = ref(db, "posts/" + postId + "/favorites");
-  onValue(favoriteCountRef, (snapshot) => {
-    const data = snapshot.val();
-    updateFavoriteCount(postElement, data);
-  });
-}
+// // Retrieve a post favorite count.
+// export function getPostFavorites(postId, postElement) {
+//   const favoriteCountRef = ref(db, "posts/" + postId + "/favorites");
+//   onValue(favoriteCountRef, (snapshot) => {
+//     const data = snapshot.val();
+//     updateFavoriteCount(postElement, data);
+//   });
+// }
 
-// Changes favorite count for posts.
-export function updateFavoriteCount() {}
-
-// Saves like to firebase database.
+// Save like to firebase database.
 export function addLike(post) {
   const auth = getAuth();
   const user = auth.currentUser;
@@ -222,7 +213,7 @@ export function addLike(post) {
     });
 }
 
-// Saves unlike from firebase database.
+// Save unlike from firebase database.
 export function removeLike(post) {
   const auth = getAuth();
   const user = auth.currentUser;
@@ -236,4 +227,13 @@ export function removeLike(post) {
     increment(-1);
 
   update(ref(db), updates);
+}
+
+/* ---------DISPLAY-------- */
+
+export function togglePostForm() {
+  document.getElementById("newPostPopUp").classList.toggle("hide");
+  document.getElementById("content").classList.toggle("fade");
+  document.getElementById("content").classList.toggle("stop-scrolling");
+  document.getElementById("header").classList.toggle("fade");
 }

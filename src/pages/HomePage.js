@@ -138,15 +138,11 @@ useEffect(() => {
     }
   }, [loading]);
 
-  useEffect(() => {
-    // saveProfilePicture();
-  }, []);
-
   if (user) {
     return (
       <>
+        <NewPostPopUp user={user} />
         <div id="content">
-          <NewPostPopUp user={user} />
           <div style={{ display: "flex" }}>
             <div id="homePosts">
               <NewPostButtons user={user} />

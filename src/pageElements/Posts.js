@@ -9,7 +9,7 @@ import comment from "../images/chat.png";
 
 const Posts = ({ posts, followers}) => {
 
-  // Saves user like or unlike of a post.
+  // Save user like or unlike of a post.
   function toggleLikedStatus(e, post) {
     console.log(e.target.nextSibling.nextSibling);
     if (e.target.classList[0] === "like") {

@@ -10,8 +10,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { ref, update, child, get } from "firebase/database";
 import { db } from "../firebase-config";
 
-// TODO: save default profile pic on creating new user
-
 const SignUp = ({ user }) => {
   const navigate = useNavigate();
 
@@ -49,15 +47,12 @@ const SignUp = ({ user }) => {
 
   // Iterates through all saved usernames to determine if a name is already taken.
   function isNameTaken(userNames, newName) {
-    let names = Object.values(userNames);
-    names.forEach((el) => {
-      console.log(el.userName);
+    let userInfo = Object.values(userNames);
+    userInfo.forEach((el) => {
       if (newName === el.userName) {
-        console.log(true);
         return true;
       }
     });
-    console.log(false);
     return false;
   }
 
@@ -70,8 +65,6 @@ const SignUp = ({ user }) => {
         const user = userCredential.user;
         sendUserEmailVerification();
         updateUserProfile(displayName);
-        saveUserName(displayName);
-        createUserInfo();
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -104,49 +97,52 @@ const SignUp = ({ user }) => {
       });
   }
 
-  // Saves unique display name in user's firebase auth profile..
+  // Update new user profile to firebase auth.
   function updateUserProfile(displayName) {
     const auth = getAuth();
 
     updateProfile(auth.currentUser, {
       displayName: displayName,
+      photoURL:
+        "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/new_user.png?alt=media&token=445485db-8fce-4b84-8f71-136c1d7e92b1",
     })
       .then(() => {
         // Profile updated!
-        // ...
+        createUserInfo();
       })
       .catch((error) => {
         // An error occurred
-        // ...
       });
   }
 
-  // Save user name in masterlist of all usernames in firebase database.
-  function saveUserName(userName) {
-    const uid = user.uid;
-    const userData = {
-      userName: userName,
-    };
-
-    const updates = {};
-    updates["/allUserNames/" + uid] = userData;
-
-    return update(ref(db), updates);
-  }
-
-  // After signing up, creates a following/followers subdirectory for user, and adds user info to each.
+  // After sign up, create and save user info in database.
   function createUserInfo() {
     const uid = user.uid;
 
-    // A post entry.
     const data = {
       uid: uid,
       displayName: user.displayName,
     };
 
+    const userNameData = {
+      userName: user.displayName,
+    };
+
+    const pictureData = {
+      photoURL:
+        "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/new_user.png?alt=media&token=445485db-8fce-4b84-8f71-136c1d7e92b1",
+      user: user.displayName,
+    };
+
     const updates = {};
-    updates["/user-info/" + user.displayName + "/followers/" + user.displayName] = data;
-    updates["/user-info/" + user.displayName + "/following/" + user.displayName] = data;
+    updates[
+      "/user-info/" + user.displayName + "/followers/" + user.displayName
+    ] = data;
+    updates[
+      "/user-info/" + user.displayName + "/following/" + user.displayName
+    ] = data;
+    updates["/allUserNames/" + uid] = userNameData;
+    updates["/profile-pictures/" + user.displayName] = pictureData;
 
     // Writes data simutaneoulsy in database.
     update(ref(db), updates)

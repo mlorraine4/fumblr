@@ -6,59 +6,62 @@ import link from "../images/newPostIcons/link.png";
 import quote from "../images/newPostIcons/quote.png";
 import audio from "../images/newPostIcons/headphones.png";
 import photo from "../images/newPostIcons/photo-camera.png";
+import { togglePostForm } from "../HelperFunctions";
 
 const NewPostButtons = ({ user }) => {
-  function openPostForm() {
-    document.getElementById("newPostPopUp").style.display = "block";
-  }
 
   return (
     <div style={{ display: "flex" }}>
       <Link to="fumblr/settings/blog">
-        <img id="mainProfileImg" className="cover" alt="" src={user.photoURL}></img>
+        <img
+          id="mainProfileImg"
+          className="cover"
+          alt=""
+          src={user.photoURL}
+        ></img>
       </Link>
       <div id="newPostButtons">
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={text} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Text</div>
+          <div>Text</div>
         </div>
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={photo} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Photo</div>
+          <div>Photo</div>
         </div>
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={quote} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Quote</div>
+          <div>Quote</div>
         </div>
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={link} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Link</div>
+          <div>Link</div>
         </div>
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={chat} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Chat</div>
+          <div>Chat</div>
         </div>
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={audio} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Audio</div>
+          <div>Audio</div>
         </div>
-        <div>
+        <div onClick={togglePostForm}>
           <div className="imgBackground">
             <img src={video} className="newPostImg" alt=""></img>
           </div>
-          <div onClick={openPostForm}>Video</div>
+          <div>Video</div>
         </div>
       </div>
     </div>
