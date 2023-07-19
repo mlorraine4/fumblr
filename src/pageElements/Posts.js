@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { saveFollow, addLike, removeLike } from "../HelperFunctions";
 import like from "../images/like.png";
 import liked from "../images/liked.png";
@@ -7,7 +6,7 @@ import repost from "../images/exchange.png";
 import share from "../images/send.png";
 import comment from "../images/chat.png";
 
-const Posts = ({ posts, followers}) => {
+const Posts = ({ posts, classNames, isFollowing}) => {
 
   // Save user like or unlike of a post.
   function toggleLikedStatus(e, post) {
@@ -27,21 +26,13 @@ const Posts = ({ posts, followers}) => {
     }
   }
 
-  function isFollowing(author) {
-    if (followers.includes(author)) {
-      return "followBtn hide";
-    } else {
-      return "followBtn";
-    }
-  }
-
   return (
     <div id="posts">
       {posts.map((post) => {
         return (
-          <div style={{ display: "flex", marginTop: "50px" }} key={post.id}>
-            <img src={post.authorPic} className="userProfile cover"></img>
-            <div className="post">
+          <div style={{ display: "flex" }} key={post.id}>
+            <img src={post.authorPic} className={classNames.profile}></img>
+            <div className={classNames.post}>
               <div className="postHeader">
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <div className="postAuthor">{post.author}</div>
@@ -57,10 +48,10 @@ const Posts = ({ posts, followers}) => {
                 <img alt="" src={ellipsis} style={{ height: "20px" }}></img>
               </div>
               <div style={{ backgroundColor: "black" }}>
-                <img src={post.imgUrl} className="postImg"></img>
+                <img src={post.imgUrl} className={classNames.postImg}></img>
               </div>
-              <div className="postTitle">{post.title}</div>
-              <div className="postBody">{post.body}</div>
+              <div className={classNames.postTitle}>{post.title}</div>
+              <div className={classNames.postBody}>{post.body}</div>
               <div className="postIconsContainer">
                 <div style={{ position: "relative" }}>
                   <img

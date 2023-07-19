@@ -10,6 +10,7 @@
   --background: rgb(17, 17, 22);
   --secondary-background: rgb(39, 36, 49);
   --text-primary: #61dafb;
+  --text-light: rgb(97, 218, 251, 0.5);
   --text-secondary: #CE9FFF;
   --accent: rgb(200, 7, 200);
   --accent-faded: rgb(200, 7, 200, 0.5);
@@ -26,6 +27,14 @@
 
 .App-link {
   color: #61dafb;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover, a:focus, a:active, a:visited {
+  color: var(--text-primary);
 }
 
 img {
@@ -66,10 +75,6 @@ input::placeholder {
   overflow: hidden;
 }
 
-.userProfile, #mainProfileImg {
-  border-radius: 12px;
-}
-
 .editBackground, .editProfileBackground {
   background-color: var(--accent-faded);
   border-radius: 8px;
@@ -91,8 +96,9 @@ input::placeholder {
 }
 
 #logo, .navBarIcons {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
+  margin: auto;
 }
 
 #logo {
@@ -152,6 +158,15 @@ input::placeholder {
   padding-top: 80px;
 }
 
+#content {
+  width: min-content;
+  background-color: var(--background);
+}
+
+#homePosts {
+  margin-top: 20px;
+}
+
 #newPostButtons {
   display: flex;
   justify-content: center;
@@ -162,6 +177,7 @@ input::placeholder {
   height: min-content;
   padding: 5px;
   width: 490px;
+  margin-bottom: 50px;
 }
 
 .imgBackground {
@@ -228,16 +244,23 @@ input::placeholder {
 }
 
 #mainProfileImg, .userProfile {
-  height: 85px;
-  width: 85px;
-  margin-left: 120px;
+  border-radius: 12px;
   margin-right: 20px;
 }
 
+#mainProfileImg {
+  height: 100px;
+  width: 100px;
+  margin-left: 100px;
+}
+
 .userProfile {
+  height: 85px;
+  width: 85px;
   position: sticky;
-  top: 50px;
+  top: 64px;
   margin-top: 15px;
+  margin-left: 115px;
 }
 
 .newPostImg {
@@ -247,6 +270,7 @@ input::placeholder {
 
 #posts {
   color: var(--text-primary);
+  text-align: center;
 }
 
 .post {
@@ -265,6 +289,7 @@ input::placeholder {
   align-items: center;
   height: 40px;
   padding: 10px;
+  border-bottom: 1px solid var(--subtle);
 }
 
 .postTitle {
@@ -279,10 +304,6 @@ input::placeholder {
 .postAuthor {
   font-weight: bold;
   padding: 5px;
-}
-
-#homeNewBlogs {
-  margin-right: 50px;
 }
 
 #inboxContent {
@@ -330,18 +351,6 @@ input::placeholder {
   color: var(--accent);
 }
 
-.newBlogsContainer {
-  height: 400px;
-  color: var(--accent);
-  text-align: left;
-  margin: 10px 0 10px 40px;
-}
-
-.newBlogsTitle {
-  border-bottom: .5px solid var(--accent);
-  font-weight: bold;
-}
-
 /* FOLLOWERS PAGE */
 
 #followers {
@@ -359,11 +368,11 @@ input::placeholder {
 /* PROFILE SETTINGS PAGE */
 
 #editProfileContainer {
-  width: 70vw;
+  width: 60vw;
   position: relative;
   background-color: var(--secondary-background);
   border-radius: 12px;
-  margin: 20px;
+  margin: 20px 5vw 50px 5vw;
   padding-bottom: 50px;
 }
 
@@ -444,6 +453,7 @@ input::placeholder {
 
 #settingsNavBar {
   padding: 0 20px 20px 20px;
+  margin: 20px auto 0 auto;
 }
 
 .navBarComponent {
@@ -451,6 +461,101 @@ input::placeholder {
   border-bottom: 0.2px solid var(--subtle);
 }
 
-.navBarComponent:hover {
+.navBarComponent:hover, .accountPopUpItem:hover {
   background-color: var(--subtle);
+}
+
+.currentLink {
+  background-color: var(--subtle);
+}
+
+/* NEW BLOGS NAVBAR */
+
+#homeNewBlogs {
+  margin-right: 50px;
+}
+
+.newBlogsContainer {
+  color: var(--accent);
+  text-align: left;
+  margin: 10px 0 40px 40px;
+}
+
+.newBlogsTitle {
+  color: var(--text-primary);
+  border-bottom: .5px solid var(--text-primary);
+  font-weight: bold;
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#randomBlogsContent {
+  min-width: 400px;
+}
+
+.blogContainer {
+  padding: 10px 0 10px 0;
+  color: var(--text-primary);
+  width: 90%;
+  margin: auto;
+}
+
+.randomBlogPic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  margin-right: 10px;
+}
+
+.blogUserName {
+  font-weight: bold;
+}
+
+.blogTitle {
+  color: var(--text-light);
+}
+
+.followBtn, #refreshBtn {
+  background-color: var(--accent);
+  color: white;
+}
+
+.followBtn:hover, #refreshBtn:hover {
+  background-color: var(--accent-faded);
+  color: white;
+}
+
+.close {
+  padding-left: 10px
+}
+
+.radarPost {
+  width: 80%;
+  padding: 0 10px 10px 10px;
+  margin-top: 15px;
+  border-radius: 12px;
+  background-color: var(--secondary-background);
+}
+
+.radarProfile {
+  height: 30px;
+  width: 30px;
+  margin-right: 10px;
+  margin-top: 15px;
+}
+
+.radarImg {
+  width: 100%;
+  height: auto;
+}
+
+.radarTitle {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.radarBody {
+  font-size: .8em;
 }

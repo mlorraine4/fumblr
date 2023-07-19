@@ -26,7 +26,7 @@ import UserPosts from "./UserPosts";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-const HomePage = () => {
+const HomePage = ({followers, isFollowing}) => {
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
 
@@ -107,9 +107,11 @@ const HomePage = () => {
   }
 
   // Saves new profile picture to firebase database.
-  function saveProfilePicture(photoURL = "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/profileImgs%2FN8i95WIgBYckPhENmbKwVKnjhJt1%2FuserProfileImg?alt=media&token=2e790913-2c7d-4024-aec6-14f9ac1c3069") {
+  function saveProfilePicture(
+    photoURL = "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/profileImgs%2FN8i95WIgBYckPhENmbKwVKnjhJt1%2FuserProfileImg?alt=media&token=2e790913-2c7d-4024-aec6-14f9ac1c3069"
+  ) {
     // const user = getAuth().currentUser;
-    const displayName = "stickyfrogs"
+    const displayName = "stickyfrogs";
 
     const data = {
       user: displayName,
@@ -131,8 +133,7 @@ const HomePage = () => {
       });
   }
 
-
-useEffect(() => {
+  useEffect(() => {
     if (loading) {
       document.querySelector("#content").innerHTML = "Loading . . .";
     }
@@ -146,10 +147,17 @@ useEffect(() => {
           <div style={{ display: "flex" }}>
             <div id="homePosts">
               <NewPostButtons user={user} />
-              <PostsMain user={user} />
+              <PostsMain
+                user={user}
+                followers={followers}
+                isFollowing={isFollowing}
+              />
             </div>
             <div id="homeNewBlogs">
-              <NewBlogsToFollow />
+              <NewBlogsToFollow
+                followers={followers}
+                isFollowing={isFollowing}
+              />
             </div>
           </div>
           {/* <button onClick={writeNewPost}>add post</button> */}

@@ -9,13 +9,21 @@ import { useNavigate } from "react-router-dom";
 
 // TODO: delete post on unlike, or refresh posts?
 
-const SavedPosts = () => {
+const SavedPosts = ({isFollowing}) => {
   const auth = getAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [hasLikes, setHasLikes] = useState(true);
   const [user, loading, error] = useAuthState(auth);
+
+  const classNames = {
+    post: "post",
+    profile: "userProfile cover",
+    postImg: "postImg",
+    postTitle: "postTitle",
+    postBody: "postBody",
+  };
 
   // Retrieves all posts from firebase database.
   function getIDs(displayName) {
@@ -133,7 +141,7 @@ const SavedPosts = () => {
             marginLeft: "calc((100vw - 500px)/2 - 225px)",
           }}
         >
-          <Posts posts={posts} followers={followers} />
+          <Posts posts={posts} followers={followers} classNames={classNames} isFollowing={isFollowing}/>
         </div>
         <div>FOOTER</div>
       </>

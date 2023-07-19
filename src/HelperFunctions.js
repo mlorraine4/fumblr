@@ -1,5 +1,18 @@
-import { db } from "./firebase-config";
-import { ref, update, onValue, increment, get } from "firebase/database";
+import { db, storage } from "./firebase-config";
+import {
+  ref as dbRef,
+  update,
+  increment,
+  get,
+  child,
+  getDatabase,
+  onValue,
+} from "firebase/database";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 import { updateEmail, updateProfile, getAuth, signOut } from "firebase/auth";
 
 /* ---------FIREBASE FUNCTIONS-------- */
@@ -71,6 +84,8 @@ export function updateUserProfile(displayName, photoURL) {
     });
 }
 
+// TODO: get rid of both of these functions or rename to create generic user photo
+
 export function updateUserProfilePicture(photoURL) {
   const auth = getAuth();
   updateProfile(auth.currentUser, {
@@ -87,7 +102,7 @@ export function updateUserProfilePicture(photoURL) {
     });
 }
 
-// Save new profile picture to firebase database.
+// Update profile picture in firebase database.
 export function saveProfilePicture(photoURL) {
   const user = getAuth().currentUser;
 
@@ -100,7 +115,7 @@ export function saveProfilePicture(photoURL) {
   updates["/profile-pictures/" + user.displayName] = data;
 
   // Writes data simutaneoulsy in database.
-  update(ref(db), updates)
+  update(dbRef(db), updates)
     .then(() => {
       // Data saved successfully!
       console.log("info saved");
@@ -111,31 +126,31 @@ export function saveProfilePicture(photoURL) {
     });
 }
 
-export function getUserProfilePic() {
-  const user = getAuth().currentUser;
-  const profileRef = ref(db, "profile-pictures/" + user.displayName);
-  onValue(profileRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log(data);
-  });
-}
+// export function getUserProfilePic() {
+//   const user = getAuth().currentUser;
+//   const profileRef = dbRef(db, "profile-pictures/" + user.displayName);
+//   onValue(profileRef, (snapshot) => {
+//     const data = snapshot.val();
+//   });
+// }
 
 // Update user's email address.
-export function updateUserEmail(email) {
-  const auth = getAuth();
+// export function updateUserEmail(email) {
+//   const auth = getAuth();
 
-  updateEmail(auth.currentUser, email)
-    .then(() => {
-      // Email updated!
-      // ...
-    })
-    .catch((error) => {
-      // An error occurred
-      // ...
-    });
-}
+//   updateEmail(auth.currentUser, email)
+//     .then(() => {
+//       // Email updated!
+//       // ...
+//     })
+//     .catch((error) => {
+//       // An error occurred
+//       // ...
+//     });
+// }
 
 // After user follows another, save info in database.
+// TODO: need to find another way to display photos, can't update photo URLs rn
 export function saveFollow(newUser, photoURL) {
   // user is current user, wanting to follow new user
   const auth = getAuth();
@@ -160,7 +175,7 @@ export function saveFollow(newUser, photoURL) {
     userData;
 
   // Write data simutaneoulsy in database.
-  update(ref(db), updates)
+  update(dbRef(db), updates)
     .then(() => {
       // Data saved successfully!
       console.log("info saved");
@@ -173,7 +188,7 @@ export function saveFollow(newUser, photoURL) {
 
 // // Retrieve a post favorite count.
 // export function getPostFavorites(postId, postElement) {
-//   const favoriteCountRef = ref(db, "posts/" + postId + "/favorites");
+//   const favoriteCountRef = dbRef(db, "posts/" + postId + "/favorites");
 //   onValue(favoriteCountRef, (snapshot) => {
 //     const data = snapshot.val();
 //     updateFavoriteCount(postElement, data);
@@ -204,7 +219,7 @@ export function addLike(post) {
   updates["user-posts/" + post.author + "/" + post.id + "/starCount"] =
     increment(1);
 
-  update(ref(db), updates)
+  update(dbRef(db), updates)
     .then(() => {
       console.log("data saved!");
     })
@@ -226,7 +241,102 @@ export function removeLike(post) {
   updates["user-posts/" + post.author + "/" + post.id + "/starCount"] =
     increment(-1);
 
-  update(ref(db), updates);
+  update(dbRef(db), updates);
+}
+
+// Save updated profile picture to firebase storage, and all references in database.
+export async function savePhoto(newFile) {
+  const user = getAuth().currentUser;
+  const uid = user.uid;
+  const imgFilePathName = "profileImgs/" + uid + "/userProfileImg";
+  downloadImg(imgFilePathName, newFile).then(() => {
+    getImgUrl(imgFilePathName).then((url) => {
+      updateUserPhoto(url);
+      getUserPostIDs(url).then((snapshot) => {
+        updateDBWithNewPhoto(url, snapshot.val()).then(() => {
+          displayUpdate();
+        });
+      });
+    });
+  });
+}
+
+//  Retreive who a user is following from firebase database.
+export async function getFollowers(currentUser) {
+  const ref = dbRef(getDatabase());
+  return get(
+    child(ref, "user-info/" + currentUser.displayName + "/following")
+  );
+}
+
+export async function saveTitle(title) {
+  const user = getAuth.currentUser();
+  const updates = {};
+  updates["/user-profiles/" + user.displayName + "/title"] = title;
+
+  return update(dbRef(db), updates);
+}
+
+export async function saveDescription(description) {
+  const user = getAuth.currentUser();
+  const updates = {};
+  updates["/user-profiles/" + user.displayName + "/description"] = description;
+
+  return update(dbRef(db), updates);
+}
+
+// Save image to firebase storage.
+export async function downloadImg(imgFilePathName, newFile) {
+  // Create a unique reference in cloud storage using the user's post key and user id.
+  const newImgRef = storageRef(storage, imgFilePathName);
+  return uploadBytes(newImgRef, newFile);
+}
+
+// Get post's img url from firebase storage.
+export async function getImgUrl(imgFilePath) {
+  return getDownloadURL(storageRef(storage, imgFilePath));
+}
+
+// Update photo url for firebase auth user.
+export async function updateUserPhoto(photoURL) {
+  const auth = getAuth();
+  return updateProfile(auth.currentUser, {
+    photoURL: photoURL,
+  });
+}
+
+// Get all user posts' ids from database.
+export async function getUserPostIDs() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-posts/" + user.displayName));
+}
+
+// Update firebase database with new user photo.
+export async function updateDBWithNewPhoto(url, posts) {
+  const user = getAuth().currentUser;
+  let ids = Object.keys(posts);
+  const updates = {};
+  updates["/user-profiles/" + user.displayName + "/photoURL"] = url;
+
+  ids.forEach((id) => {
+    updates["/user-posts/" + user.displayName + "/" + id + "/authorPic"] = url;
+    updates["posts/" + id + "/authorPic"] = url;
+  });
+
+  return update(dbRef(db), updates);
+}
+
+/* ---------HELPER FUNCTIONS-------- */
+
+// Return follower array from object.
+export function iterateFollowers(followersObj) {
+  let followersArray = [];
+  let followers = Object.values(followersObj);
+  followers.forEach((el) => {
+    followersArray.push(el.user);
+  });
+  return followersArray;
 }
 
 /* ---------DISPLAY-------- */
@@ -236,4 +346,21 @@ export function togglePostForm() {
   document.getElementById("content").classList.toggle("fade");
   document.getElementById("content").classList.toggle("stop-scrolling");
   document.getElementById("header").classList.toggle("fade");
+}
+
+export function toggleEdit() {
+  document.querySelector("#editBtn").classList.toggle("hide");
+  document.querySelector("#saveBtn").classList.toggle("hide");
+  document.querySelector("#cancelBtn").classList.toggle("hide");
+  document.querySelector("#inputContainer").classList.toggle("hide");
+  document.querySelector("#displayDescription").classList.toggle("hide");
+  document.querySelector("#displayDescription").classList.toggle("show");
+  document.querySelector("#editDescription").classList.toggle("hide");
+  document.querySelector("#editDescription").classList.toggle("show");
+}
+
+export function displayUpdate() {
+  toggleEdit();
+  document.querySelector("#updateInfo").innerHTML =
+    "Profile successfully updated.";
 }

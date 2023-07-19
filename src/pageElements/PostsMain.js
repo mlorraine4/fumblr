@@ -4,9 +4,16 @@ import like from "../images/like.png";
 import liked from "../images/liked.png";
 import Posts from "./Posts";
 
-const PostsMain = ({ user }) => {
+const PostsMain = ({ user, followers, isFollowing }) => {
   const [posts, setPosts] = useState([]);
-  const [followers, setFollowers] = useState([]);
+
+  const classNames = {
+    post: "post",
+    profile: "userProfile cover",
+    postImg: "postImg",
+    postTitle: "postTitle",
+    postBody: "postBody"
+  };
 
   // Retrieves all posts from firebase database.
   function getPosts() {
@@ -56,42 +63,17 @@ const PostsMain = ({ user }) => {
     setPosts(sortedArray);
   }
 
-  //  Retreives who a user is following from firebase.
-  function getFollowers() {
-    console.log(user);
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, "user-info/" + user.displayName + "/following"))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log(snapshot.val());
-          iterateFollowers(snapshot.val());
-        } else {
-          console.log("No data available");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
-
-  // Saves user followers.
-  function iterateFollowers(followersObj) {
-    let followersArray = [];
-    let followers = Object.values(followersObj);
-    followers.forEach((el) => {
-      followersArray.push(el.user);
-    });
-    setFollowers(followersArray);
-  }
-
   useEffect(() => {
     getPosts();
-    getFollowers();
   }, []);
 
   return (
     <>
-      <Posts posts={posts} followers={followers} />
+      <Posts
+        posts={posts}
+        classNames={classNames}
+        isFollowing={isFollowing}
+      />
     </>
   );
 };

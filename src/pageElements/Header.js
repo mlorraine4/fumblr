@@ -51,6 +51,7 @@ const Header = ({ user }) => {
           <div
             style={{
               display: "flex",
+              alignItems: "center",
               width: "250px",
               justifyContent: "space-evenly",
               marginRight: "20px"

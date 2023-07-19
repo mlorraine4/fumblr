@@ -1,11 +1,12 @@
 import "./styles/App.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getFirebaseConfig, db } from "./firebase-config";
 import {
   getAuth,
   onAuthStateChanged,
 } from "firebase/auth";
+import { child, ref, getDatabase, get } from "firebase/database";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import AccountSettings from "./pages/AccountSettings";
 import Inbox from "./pages/Inbox";
@@ -17,6 +18,7 @@ import Header from "./pageElements/Header";
 import ProfileSettings from "./pages/ProfileSettings";
 import Followers from "./pages/Followers";
 import SavedPosts from "./pages/SavedPosts";
+import { getFollowers, iterateFollowers } from "./HelperFunctions";
 
 /*                                              -----TO DO LIST-----
   1. notification functionality (user has new follower, user's post has a new like, user recieves new message)
@@ -34,6 +36,7 @@ import SavedPosts from "./pages/SavedPosts";
 function App() {
   const auth = getAuth();
   const [currentUser, setCurrentUser] = useState(null);
+  const [followers, setFollowers] = useState([]);
   const [theme, setTheme] = useState("default");
 
   // Observer for user sign in status.
@@ -53,6 +56,31 @@ function App() {
     });
   }
 
+  // //  Retreives who a user is following from firebase.
+  // function getFollowers() {
+  //   const dbRef = ref(getDatabase());
+  //   get(child(dbRef, "user-info/" + currentUser.displayName + "/following"))
+  //     .then((snapshot) => {
+  //       if (snapshot.exists()) {
+  //         iterateFollowers(snapshot.val());
+  //       } else {
+  //         console.log("No data available");
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // }
+
+  // Determine if user is following another user.
+  function isFollowing(author) {
+    if (followers.includes(author)) {
+      return "followBtn hide";
+    } else {
+      return "followBtn";
+    }
+  }
+
   function changeTheme() {
     if (theme === "default") {
       setTheme("dark");
@@ -65,12 +93,20 @@ function App() {
   initializeApp(firebaseAppConfig);
   initalizeFirebaseAuth();
 
+  useEffect(() => {
+    if (currentUser) {
+      getFollowers(currentUser).then((snapshot) => {
+        setFollowers(iterateFollowers(snapshot.val()));
+      });
+    }
+  }, [currentUser]);
+
   return (
     <div className="App" data-theme={"dark"}>
       <HashRouter>
         <Header user={currentUser} />
         <Routes>
-          <Route path={"/"} element={<HomePage />}></Route>
+          <Route path={"/"} element={<HomePage followers={followers} isFollowing={isFollowing}/>}></Route>
           <Route
             path={"/fumblr/account/login"}
             element={<LogIn user={currentUser} />}
@@ -100,7 +136,7 @@ function App() {
           ></Route>
           <Route
             path={"/fumblr/account/liked-posts"}
-            element={<SavedPosts />}
+            element={<SavedPosts isFollowing={isFollowing} />}
           ></Route>
         </Routes>
       </HashRouter>

@@ -6,7 +6,7 @@ const AccountPopUp = ({user, toggleDisplay}) => {
   return (
     <div id="accountPopUp" className="hide">
       <div
-        className="pad"
+        className="accountPopUpItem"
         style={{
           display: "flex",
           justifyContent: "space-around",
@@ -19,22 +19,22 @@ const AccountPopUp = ({user, toggleDisplay}) => {
         </div>
       </div>
       <Link to={"/fumblr/posts/user"}>
-        <div className="pad" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleDisplay}>
           Posts
         </div>
       </Link>
       <Link to={"/fumblr/account/followers"}>
-        <div className="pad" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleDisplay}>
           Followers
         </div>
       </Link>
       <Link to="/fumblr/account/liked-posts">
-        <div className="pad" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleDisplay}>
           Saved Posts
         </div>
       </Link>
       <Link to={"/fumblr/settings/account"}>
-        <div className="pad" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleDisplay}>
           Settings
         </div>
       </Link>
