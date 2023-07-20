@@ -1,7 +1,5 @@
-import Header from "../pageElements/Header";
 import NewPostButtons from "../pageElements/NewPostButtons";
 import NewPostPopUp from "../pageElements/NewPostPopUp";
-import PostsMain from "../pageElements/PostsMain";
 import NewBlogsToFollow from "../pageElements/NewBlogsToFollow";
 import { db, storage } from "../firebase-config";
 import {
@@ -25,10 +23,13 @@ import { useState, useEffect } from "react";
 import UserPosts from "./UserPosts";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { MainPostClassNames, getPosts, iteratePosts } from "../HelperFunctions";
+import Posts from "../pageElements/Posts";
 
-const HomePage = ({followers, isFollowing}) => {
+const HomePage = ({isFollowing}) => {
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
+  const [allPosts, setAllPosts] = useState([]);
 
   // TODO: REMOVE THIS WHEN DONE ADDING POSTS BY OTHER USERS!
   function writeNewPost() {
@@ -106,38 +107,19 @@ const HomePage = ({followers, isFollowing}) => {
     });
   }
 
-  // Saves new profile picture to firebase database.
-  function saveProfilePicture(
-    photoURL = "https://firebasestorage.googleapis.com/v0/b/fake-social-app-e763d.appspot.com/o/profileImgs%2FN8i95WIgBYckPhENmbKwVKnjhJt1%2FuserProfileImg?alt=media&token=2e790913-2c7d-4024-aec6-14f9ac1c3069"
-  ) {
-    // const user = getAuth().currentUser;
-    const displayName = "stickyfrogs";
-
-    const data = {
-      user: displayName,
-      photoURL: photoURL,
-    };
-
-    const updates = {};
-    updates["/profile-pictures/" + displayName] = data;
-
-    // Writes data simutaneoulsy in database.
-    update(dbRef(db), updates)
-      .then(() => {
-        // Data saved successfully!
-        console.log("info saved");
-      })
-      .catch((error) => {
-        // The write failed...
-        console.log(error);
-      });
-  }
-
   useEffect(() => {
     if (loading) {
       document.querySelector("#content").innerHTML = "Loading . . .";
     }
   }, [loading]);
+
+  useEffect(() => {
+    getPosts().then((snapshot) => {
+      if (snapshot.exists()) {
+        setAllPosts(iteratePosts(snapshot.val()));
+      }
+    });
+  }, []);
 
   if (user) {
     return (
@@ -147,17 +129,14 @@ const HomePage = ({followers, isFollowing}) => {
           <div style={{ display: "flex" }}>
             <div id="homePosts">
               <NewPostButtons user={user} />
-              <PostsMain
-                user={user}
-                followers={followers}
+              <Posts
+                posts={allPosts}
+                classNames={MainPostClassNames}
                 isFollowing={isFollowing}
               />
             </div>
             <div id="homeNewBlogs">
-              <NewBlogsToFollow
-                followers={followers}
-                isFollowing={isFollowing}
-              />
+              <NewBlogsToFollow isFollowing={isFollowing} posts={allPosts} />
             </div>
           </div>
           {/* <button onClick={writeNewPost}>add post</button> */}

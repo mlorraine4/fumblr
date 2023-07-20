@@ -18,7 +18,7 @@ import Header from "./pageElements/Header";
 import ProfileSettings from "./pages/ProfileSettings";
 import Followers from "./pages/Followers";
 import SavedPosts from "./pages/SavedPosts";
-import { getFollowers, iterateFollowers } from "./HelperFunctions";
+import { getFollowers, getProfilePic } from "./HelperFunctions";
 
 /*                                              -----TO DO LIST-----
   1. notification functionality (user has new follower, user's post has a new like, user recieves new message)
@@ -56,25 +56,30 @@ function App() {
     });
   }
 
-  // //  Retreives who a user is following from firebase.
-  // function getFollowers() {
-  //   const dbRef = ref(getDatabase());
-  //   get(child(dbRef, "user-info/" + currentUser.displayName + "/following"))
-  //     .then((snapshot) => {
-  //       if (snapshot.exists()) {
-  //         iterateFollowers(snapshot.val());
-  //       } else {
-  //         console.log("No data available");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // }
+  // TODO: LEAVE IN APP.
+  // Get each follower's profile picture and add to followers array.
+  async function iterateFollowers(followersObj) {
+    let followersArray = [];
+    let followers = Object.values(followersObj);
+    followers.forEach((el) => {
+      getProfilePic(el.user).then((snapshot) => {
+        if (snapshot.exists()) {
+          followersArray.push({
+            user: el.user,
+            photoURL: snapshot.val(),
+          });
+        }
+        if (followersArray.length === followers.length) {
+          setFollowers(followersArray);
+        }
+      });
+    });
+  }
 
   // Determine if user is following another user.
   function isFollowing(author) {
-    if (followers.includes(author)) {
+    if (followers.some(el => el.user === author))
+    {
       return "followBtn hide";
     } else {
       return "followBtn";
@@ -96,7 +101,9 @@ function App() {
   useEffect(() => {
     if (currentUser) {
       getFollowers(currentUser).then((snapshot) => {
-        setFollowers(iterateFollowers(snapshot.val()));
+        if (snapshot.exists()) {
+          iterateFollowers(snapshot.val());
+        }
       });
     }
   }, [currentUser]);
@@ -106,7 +113,12 @@ function App() {
       <HashRouter>
         <Header user={currentUser} />
         <Routes>
-          <Route path={"/"} element={<HomePage followers={followers} isFollowing={isFollowing}/>}></Route>
+          <Route
+            path={"/"}
+            element={
+              <HomePage followers={followers} isFollowing={isFollowing} />
+            }
+          ></Route>
           <Route
             path={"/fumblr/account/login"}
             element={<LogIn user={currentUser} />}
@@ -128,11 +140,11 @@ function App() {
           <Route
             // TODO: how to make dynamic links using user name (want user = display name)
             path={"/fumblr/posts/user"}
-            element={<UserPosts />}
+            element={<UserPosts isFollowing={isFollowing} />}
           ></Route>
           <Route
             path={"/fumblr/account/followers"}
-            element={<Followers />}
+            element={<Followers followers={followers} />}
           ></Route>
           <Route
             path={"/fumblr/account/liked-posts"}

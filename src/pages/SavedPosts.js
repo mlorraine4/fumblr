@@ -1,126 +1,65 @@
-import like from "../images/like.png";
 import liked from "../images/liked.png";
-import { child, ref, getDatabase, get } from "firebase/database";
 import { useState, useEffect } from "react";
 import Posts from "../pageElements/Posts";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
+import { MainPostClassNames, getIDs, getPost, iterateIDs, sortLikedPosts } from "../HelperFunctions";
+import { db } from "../firebase-config";
+import { ref as dbRef, onValue } from "firebase/database";
 
-// TODO: delete post on unlike, or refresh posts?
-
-const SavedPosts = ({isFollowing}) => {
+const SavedPosts = ({ isFollowing }) => {
   const auth = getAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
-  const [followers, setFollowers] = useState([]);
   const [hasLikes, setHasLikes] = useState(true);
   const [user, loading, error] = useAuthState(auth);
 
-  const classNames = {
-    post: "post",
-    profile: "userProfile cover",
-    postImg: "postImg",
-    postTitle: "postTitle",
-    postBody: "postBody",
-  };
-
-  // Retrieves all posts from firebase database.
-  function getIDs(displayName) {
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, "user-info/" + displayName + "/liked-posts"))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log("getting snapshot");
-          iterateIDs(snapshot.val());
-        } else {
-          console.log("No data available");
-          setHasLikes(false);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
-
-  function iterateIDs(postsObj) {
-    let postIDs = [];
-    let ids = Object.values(postsObj);
-    ids.forEach((el) => {
-      postIDs.push(el.id);
-    });
-    getLikedPosts(postIDs);
-  }
-
-  function getLikedPosts(ids) {
+  function loadPosts() {
     const postArray = [];
-    ids.forEach((id) => {
-      const dbRef = ref(getDatabase());
-      get(child(dbRef, "posts/" + id))
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            console.log("getting snapshot");
-            postArray.push({
-              ...snapshot.val(),
-              id: id,
-              src: liked,
-              className: "liked",
-            });
-            if (postArray.length === ids.length) {
-              sortLikedPosts(postArray);
+
+    getIDs().then((snapshot) => {
+      if (snapshot.exists()) {
+        let ids = iterateIDs(snapshot.val());
+        ids.forEach((id) => {
+          getPost(id).then((postSnapshot) => {
+            if (postSnapshot.exists()) {
+              postArray.push({
+                ...postSnapshot.val(),
+                id: id,
+                src: liked,
+                className: "liked",
+              });
+              if (postArray.length === ids.length) {
+                setPosts(sortLikedPosts(postArray));
+              }
             }
-          } else {
-            console.log("No data available");
-          }
+          })
         })
-        .catch((error) => {
-          console.error(error);
-        });
+      } else {
+        setHasLikes(false);
+      }
     });
   }
 
-  // Saves all posts, orders them by most recent, and saves if user has already liked each post.
-  function sortLikedPosts(posts) {
-    const sortedArray = [];
-    for (let i = posts.length - 1; i >= 0; i--) {
-      sortedArray.push(posts[i]);
-    }
-    setPosts(sortedArray);
-  }
-
-  //  Retreives who a user is following from firebase.
-  function getFollowers(displayName) {
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, "user-info/" + displayName + "/following"))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          iterateFollowers(snapshot.val());
-        } else {
-          console.log("No data available");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
-
-  // Saves user followers.
-  function iterateFollowers(followersObj) {
-    let followersArray = [];
-    let followers = Object.values(followersObj);
-    followers.forEach((el) => {
-      followersArray.push(el.user);
+  function listener() {
+    const likedPostsRef = dbRef(db, "user-info/" + user.displayName + "/liked-posts");
+    onValue(likedPostsRef, () => {
+      loadPosts();
     });
-    setFollowers(followersArray);
   }
 
   useEffect(() => {
     if (user) {
-      getIDs(user.displayName);
-      getFollowers(user.displayName);
+      loadPosts();
+      listener();
     }
     if (!user) return navigate("/fumblr/account/login");
   }, [user]);
+
+  useEffect(() => {
+    console.log(posts);
+  }, [posts])
 
   if (loading) {
     return <div id="content">Loading . . .</div>;
@@ -141,7 +80,11 @@ const SavedPosts = ({isFollowing}) => {
             marginLeft: "calc((100vw - 500px)/2 - 225px)",
           }}
         >
-          <Posts posts={posts} followers={followers} classNames={classNames} isFollowing={isFollowing}/>
+          <Posts
+            posts={posts}
+            classNames={MainPostClassNames}
+            isFollowing={isFollowing}
+          />
         </div>
         <div>FOOTER</div>
       </>
