@@ -6,7 +6,7 @@ import {
   getAuth,
   onAuthStateChanged,
 } from "firebase/auth";
-import { child, ref, getDatabase, get } from "firebase/database";
+import { child, ref as dbRef, getDatabase, get, onValue } from "firebase/database";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import AccountSettings from "./pages/AccountSettings";
 import Inbox from "./pages/Inbox";
@@ -18,7 +18,7 @@ import Header from "./pageElements/Header";
 import ProfileSettings from "./pages/ProfileSettings";
 import Followers from "./pages/Followers";
 import SavedPosts from "./pages/SavedPosts";
-import { getFollowers, getProfilePic } from "./HelperFunctions";
+import { getFollowers, getProfilePic, getUserNotifications } from "./HelperFunctions";
 
 /*                                              -----TO DO LIST-----
   1. notification functionality (user has new follower, user's post has a new like, user recieves new message)
@@ -30,33 +30,59 @@ import { getFollowers, getProfilePic } from "./HelperFunctions";
     --add unfollow fnc on other's profiles, add edit own profile fnc
   5. page that shows user's liked posts
   6. comment on post fnc
-
 */
 
 function App() {
   const auth = getAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [followers, setFollowers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [theme, setTheme] = useState("default");
 
+  // TODO: LEAVE ALL FUNCTIONS IN APP.
   // Observer for user sign in status.
   function initalizeFirebaseAuth() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
         const uid = user.uid;
-        // ...
         setCurrentUser(user);
       } else {
         // User is signed out
-        // ...
         setCurrentUser(user);
       }
     });
   }
 
-  // TODO: LEAVE IN APP.
+  // Listen for new notifications in database.
+  function notificationListener() {
+    const notificationsRef = dbRef(
+      db,
+      "notifications/" + currentUser.displayName
+    );
+    onValue(notificationsRef, () => {
+      getUserNotifications().then((snapshot) => {
+        if (snapshot.exists()) {
+          setNotifications(iterateNotifications(snapshot.val()));
+        } else {
+          setNotifications([]);
+        }
+      });
+    });
+  }
+// TODO: might be unneccessary to save the notification id.
+  function iterateNotifications(notificationsObj) {
+    const notificationIDs = Object.keys(notificationsObj);
+    const notifications = Object.values(notificationsObj);
+    let notificationsArray = [];
+    notifications.forEach((notification, index) => {
+      notificationsArray.push({
+        ...notification,
+        notificationID: notificationIDs[index]
+      })
+    })
+    return notificationsArray;
+  }
+
   // Get each follower's profile picture and add to followers array.
   async function iterateFollowers(followersObj) {
     let followersArray = [];
@@ -78,8 +104,7 @@ function App() {
 
   // Determine if user is following another user.
   function isFollowing(author) {
-    if (followers.some(el => el.user === author))
-    {
+    if (followers.some((el) => el.user === author)) {
       return "followBtn hide";
     } else {
       return "followBtn";
@@ -105,13 +130,19 @@ function App() {
           iterateFollowers(snapshot.val());
         }
       });
+      getUserNotifications().then((snapshot) => {
+        if (snapshot.exists()) {
+          setNotifications(iterateNotifications(snapshot.val()));
+        }
+      });
+      notificationListener();
     }
   }, [currentUser]);
 
   return (
     <div className="App" data-theme={"dark"}>
       <HashRouter>
-        <Header user={currentUser} />
+        <Header user={currentUser} notifications={notifications} />
         <Routes>
           <Route
             path={"/"}

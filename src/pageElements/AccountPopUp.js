@@ -1,8 +1,7 @@
-import { signOutUser } from "../HelperFunctions";
+import { signOutUser, toggleAccountDisplay } from "../HelperFunctions";
 import { Link } from "react-router-dom";
 
-const AccountPopUp = ({user, toggleDisplay}) => {
-// TODO: toggle display after clicking link
+const AccountPopUp = () => {
   return (
     <div id="accountPopUp" className="hide">
       <div
@@ -19,22 +18,22 @@ const AccountPopUp = ({user, toggleDisplay}) => {
         </div>
       </div>
       <Link to={"/fumblr/posts/user"}>
-        <div className="accountPopUpItem" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Posts
         </div>
       </Link>
       <Link to={"/fumblr/account/followers"}>
-        <div className="accountPopUpItem" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Followers
         </div>
       </Link>
       <Link to="/fumblr/account/liked-posts">
-        <div className="accountPopUpItem" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Saved Posts
         </div>
       </Link>
       <Link to={"/fumblr/settings/account"}>
-        <div className="accountPopUpItem" onClick={toggleDisplay}>
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Settings
         </div>
       </Link>

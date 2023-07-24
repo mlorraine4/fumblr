@@ -8,36 +8,25 @@ import profile from "../images/user.png";
 import bell from "../images/bell.png";
 import message from "../images/envelope.png";
 import edit from "../images/edit.png";
-import { togglePostForm } from "../HelperFunctions";
+import {
+  hidePopUps,
+  toggleAccountDisplay,
+  toggleNotificationsDisplay,
+  togglePostForm,
+} from "../HelperFunctions";
 import NewPostPopUp from "./NewPostPopUp";
+import { useEffect } from "react";
 
-const Header = ({ user }) => {
-  function toggleNotificationsDisplay() {
-    if (!document.getElementById("accountPopUp").classList.contains("hide")) {
-      document.getElementById("accountPopUp").classList.add("hide");
+const Header = ({ user, notifications }) => {
+  useEffect(() => {
+    if (document.querySelector("#notificationIcon")) {
+      if (notifications.length !== 0) {
+        document.querySelector("#notificationIcon").style.opacity = 1;
+      } else {
+        document.querySelector("#notificationIcon").style.opacity = 0;
+      }
     }
-    document.getElementById("notificationsPopUp").classList.toggle("hide");
-  }
-
-  function toggleAccountDisplay() {
-    if (
-      !document.getElementById("notificationsPopUp").classList.contains("hide")
-    ) {
-      document.getElementById("notificationsPopUp").classList.add("hide");
-    }
-    document.getElementById("accountPopUp").classList.toggle("hide");
-  }
-
-  function hidePopUps() {
-    if (
-      !document.getElementById("notificationsPopUp").classList.contains("hide")
-    ) {
-      document.getElementById("notificationsPopUp").classList.add("hide");
-    }
-    if (!document.getElementById("accountPopUp").classList.contains("hide")) {
-      document.getElementById("accountPopUp").classList.add("hide");
-    }
-  }
+  }, [notifications]);
 
   if (user !== null) {
     return (
@@ -54,7 +43,7 @@ const Header = ({ user }) => {
               alignItems: "center",
               width: "250px",
               justifyContent: "space-evenly",
-              marginRight: "20px"
+              marginRight: "20px",
             }}
           >
             <Link to="/">
@@ -80,7 +69,7 @@ const Header = ({ user }) => {
                 className="navBarIcons"
                 onClick={toggleAccountDisplay}
               ></img>
-              <AccountPopUp user={user} toggleDisplay={toggleAccountDisplay} />
+              <AccountPopUp user={user} />
             </div>
             <div style={{ position: "relative" }}>
               <img
@@ -89,7 +78,8 @@ const Header = ({ user }) => {
                 className="navBarIcons"
                 onClick={toggleNotificationsDisplay}
               ></img>
-              <NotificationsPopUp user={user} />
+              <div id="notificationIcon">{notifications.length}</div>
+              <NotificationsPopUp user={user} notifications={notifications} />
             </div>
             <div id="headerEditBackground">
               <img

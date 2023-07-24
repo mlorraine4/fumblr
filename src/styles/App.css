@@ -16,6 +16,7 @@
   --accent-faded: rgb(200, 7, 200, 0.5);
   --faded: #c4f0fd;
   --subtle: rgb(36, 43, 48);
+  --form-control-color: rebeccapurple;
 }
 
 .App {
@@ -28,6 +29,18 @@
 .App-link {
   color: #61dafb;
 }
+
+input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--secondary-background);
+  margin: 0;
+}
+
+input[type="radio"]:checked+label {
+  background-color: var(--subtle);
+}
+
 
 a {
   text-decoration: none;
@@ -51,6 +64,12 @@ button {
 
 button:hover {
   cursor: pointer;
+}
+
+button:disabled {
+  background-color: gray;
+  opacity: 0.8;
+  cursor: default;
 }
 
 input {
@@ -124,20 +143,41 @@ input::placeholder {
   color: var(--faded);
 }
 
+#notificationIcon {
+  opacity: 0;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  top: -8px;
+  left: 24px;
+  background-color: rgb(255, 0, 0);
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  font-size: 80%;
+}
+
 /* HEADER POP UPS */
 
 #notificationsPopUp, #accountPopUp {
   background-color: var(--secondary-background);
   color: var(--text-primary);
-  width: 150px;
   position: absolute;
   z-index: 2;
+}
+
+#accountPopUp {
+  width: 150px;
   top: 51px;
   left: -55px;
 }
 
-#logOutBtn:hover {
-  cursor: pointer;
+#notificationsPopUp {
+  top: 45px;
+  left: -155px;
+  width: 285px;
 }
 
 .hide {
@@ -151,6 +191,14 @@ input::placeholder {
 
 .pad {
   padding: 5px;
+}
+
+.notificationDiv {
+  padding: 10px;
+}
+
+.notificationDiv:hover {
+  background-color: var(--subtle);
 }
 
 /* HOME PAGE */
@@ -461,6 +509,10 @@ input::placeholder {
   border-bottom: 0.2px solid var(--subtle);
 }
 
+.accountPopUpItem {
+  color: var(--text-primary);
+}
+
 .navBarComponent:hover, .accountPopUpItem:hover {
   background-color: var(--subtle);
 }
@@ -566,4 +618,48 @@ input::placeholder {
 #userPostTitle {
   font-size: 1.5em;
   text-align: left;
+}
+
+/* INBOX PAGE */
+
+.matchingDiv {
+  padding: 10px;
+  margin: 10px;
+}
+
+.matchingDiv, label:hover {
+  background-color: var(--subtle);
+  cursor: pointer;
+}
+
+#chatBtn {
+  background-color: var(--text-secondary);
+  color: black;
+  font-weight: bold;
+}
+
+#chatBtn:disabled {
+  background-color: gray;
+  opacity: 0.8;
+  cursor: default;
+}
+
+#messagesContainer {
+  background-color: var(--subtle);
+  width: 500px;
+  height: 500px;
+}
+
+#inboxContent {
+  display: flex;
+}
+
+.chatListElement {
+  padding: 10px;
+  border-bottom: 1px solid var(--subtle);
+  margin-right: 20px;
+}
+
+.chatListElement:hover {
+  background-color: var(--subtle);
 }

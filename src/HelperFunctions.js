@@ -24,42 +24,43 @@ import {
 } from "firebase/auth";
 import like from "./images/like.png";
 import liked from "./images/liked.png";
+import uniqid from "uniqid";
 
 /* ---------FIREBASE FUNCTIONS-------- */
 
 // Sign up handler for adding a new user.
 export async function handleSignUp(email, password, displayName) {
-  // Username is not already taken.
-  if (!getUserNames(displayName)) {
-    console.log("adding new user");
-    addNewUser(email, password)
-      .then(() => {
-        sendUserEmailVerification();
-        createUserProfile(displayName).then(() => {
-          // successful new user!
-        });
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        if (errorCode === "auth/email-already-in-use") {
-          displayAccountTaken();
-        } else {
-          displaySignUpError();
-        }
-      });
-  } else {
-    // Username is taken.
-    displayUserTaken();
-  }
+  getUserNames().then((snapshot) => {
+    if (snapshot.exists()) {
+      if (!isUserFound(snapshot.val(), displayName)) {
+        // Username is free to use.
+        addNewUser(email, password)
+          .then(() => {
+            sendUserEmailVerification();
+            createUserProfile(displayName).then(() => {
+              // successful new user!
+              // TODO: let user know sign up was successful.
+            });
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            if (errorCode === "auth/email-already-in-use") {
+              displayAccountTaken();
+            } else {
+              displaySignUpError();
+            }
+          });
+      } else {
+        // Username is taken.
+        displayUserTaken();
+      }
+    }
+  })
 }
 
 // Get every username from database.
-export async function getUserNames(displayName) {
-  get(child(dbRef(db), "/allUserNames")).then((snapshot) => {
-    if (snapshot.exists()) {
-      isNameTaken(snapshot.val(), displayName);
-    }
-  });
+export async function getUserNames() {
+  return get(child(dbRef(db), "/allUserNames"));
 }
 
 // Send user a verification email.
@@ -255,8 +256,7 @@ export function saveProfilePicture(photoURL) {
 // }
 
 // Save user following another to database.
-export function saveFollow(newUser) {
-  // user is current user, wanting to follow new user
+export async function saveFollow(newUser) {
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -267,31 +267,20 @@ export function saveFollow(newUser) {
     child(dbRef(db), "/user-info/" + user.displayName + "/following/")
   ).key;
 
-  // Current user's information.
-  const userData = {
+  const follower = {
     user: user.displayName,
   };
 
-  // New blog info current user wants to follow.
-  const newUserData = {
+  const following = {
     user: newUser,
   };
 
   const updates = {};
   updates["/user-info/" + user.displayName + "/following/" + newFollowingKey] =
-    newUserData;
-  updates["/user-info/" + newUser + "/followers/" + newFollowerKey] = userData;
+    following;
+  updates["/user-info/" + newUser + "/followers/" + newFollowerKey] = follower;
 
-  // Write data simutaneoulsy in database.
-  update(dbRef(db), updates)
-    .then(() => {
-      // Data saved successfully!
-      console.log("info saved");
-    })
-    .catch((error) => {
-      // The write failed...
-      console.log(error);
-    });
+  return update(dbRef(db), updates)
 }
 
 // // Retrieve a post favorite count.
@@ -326,13 +315,7 @@ async function addLike(post) {
   updates["user-posts/" + post.author + "/" + post.id + "/starCount"] =
     increment(1);
 
-  update(dbRef(db), updates)
-    .then(() => {
-      console.log("data saved!");
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  return update(dbRef(db), updates);
 }
 
 // Save unlike from firebase database.
@@ -348,13 +331,49 @@ async function removeLike(post) {
   updates["user-posts/" + post.author + "/" + post.id + "/starCount"] =
     increment(-1);
 
-  update(dbRef(db), updates);
+  return update(dbRef(db), updates);
 }
 
 // Retrieve all posts from firebase database.
 export async function getPosts() {
   const ref = dbRef(getDatabase());
   return get(child(ref, "posts"));
+}
+
+// Save a new notification for a user when another likes their post, follows them, or messages them.
+export async function notifyUser(type, sender, recipient, id) {
+  // ID: refers to the post's id for a like, the message id for a new message, and "" for follow.
+  const notification = createNotificationMsg(type, sender, recipient, id);
+  const updates = {};
+  const data = {
+    type: type,
+    sender: sender,
+    recipient: recipient,
+    id: id,
+    notification: notification,
+    seen: false,
+  };
+
+  const key = sender + type + id;
+
+  updates["/notifications/" + recipient + "/" + key] = data;
+
+  return update(dbRef(db), updates);
+}
+
+// Remove notification in database from user's list.
+export async function removeNotification(type, sender, recipient, id) {
+  const key = sender + type + id;
+  const updates = {};
+  updates["/notifications/" + recipient + "/" + key] = null;
+  return update(dbRef(db), updates);
+}
+
+// Get a user's notifications.
+export async function getUserNotifications() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "notifications/" + user.displayName));
 }
 
 // Retreive users that current user is following in database.
@@ -394,6 +413,7 @@ export async function savePhoto(newFile) {
   });
 }
 
+// Save title update for a user's profile.
 export async function saveTitle(title) {
   const user = getAuth().currentUser;
   const updates = {};
@@ -402,6 +422,7 @@ export async function saveTitle(title) {
   return update(dbRef(db), updates);
 }
 
+// Save description update for a user's profile.
 export async function saveDescription(description) {
   const user = getAuth().currentUser;
   const updates = {};
@@ -417,7 +438,7 @@ export async function downloadImg(imgFilePathName, newFile) {
   return uploadBytes(newImgRef, newFile);
 }
 
-// Get post's img url from firebase storage.
+// Get img url from firebase storage.
 export async function getImgUrl(imgFilePath) {
   return getDownloadURL(storageRef(storage, imgFilePath));
 }
@@ -471,6 +492,13 @@ export async function getPost(id) {
   return get(child(ref, "posts/" + id));
 }
 
+// Get a user's list of chat's.
+export async function getListOfChats() {
+   const user = getAuth().currentUser.displayName;
+   const ref = dbRef(getDatabase());
+   return get(child(ref, "chat-users/" + user));
+ }
+
 /* ---------HELPER FUNCTIONS-------- */
 
 // Sign up form.
@@ -483,22 +511,8 @@ export function submitSignUpForm(e) {
   handleSignUp(email, password, displayName);
 }
 
-export function displayAccountTaken() {
-  document.getElementById("signUpError").innerHTML = "Account already exists.";
-}
-
-export function displaySignUpError() {
-  document.getElementById("signUpError").innerHTML =
-    "There was an error signing up. Please try again.";
-}
-
-export function displayUserTaken() {
-  document.getElementById("userNameError").innerHTML =
-    "Username is already taken. Please choose another.";
-}
-
 // Iterates through all saved usernames to determine if a name is already taken.
-function isNameTaken(userNames, newName) {
+export function isUserFound(userNames, newName) {
   let userInfo = Object.values(userNames);
   userInfo.forEach((el) => {
     if (newName === el.user) {
@@ -509,27 +523,35 @@ function isNameTaken(userNames, newName) {
 }
 
 // Save user like or unlike of a post.
-export function toggleLikedStatus(e, post) {
+export async function toggleLikedStatus(e, post) {
+  const user = getAuth().currentUser.displayName;
   if (e.target.classList[0] === "like") {
     e.target.nextSibling.nextSibling.innerHTML =
       Number(e.target.nextSibling.nextSibling.innerHTML) + 1;
     e.target.src = liked;
     e.target.setAttribute("class", "liked");
-    addLike(post);
+    addLike(post).then(() => {
+      notifyUser(
+        "like",
+        user,
+        post.author,
+        post.id
+      );
+    });
   } else {
     e.target.nextSibling.nextSibling.innerHTML =
-      Number(e.target.nextSibling.nextSibling.innerHTMLP) - 1;
+      Number(e.target.nextSibling.nextSibling.innerHTML) - 1;
     e.target.src = like;
     e.target.setAttribute("class", "like");
-    removeLike(post);
+    removeLike(post).then(() => {
+      removeNotification(
+        "like",
+        user,
+        post.author,
+        post.id
+      );
+    });
   }
-}
-
-export function hideFollowButton(author) {
-  const buttons = document.querySelectorAll(`[data-key="${author}"]`);
-  buttons.forEach((button) => {
-    button.classList = "followBtn hide";
-  });
 }
 
 // Save all posts, order them by most recent, and save if user has already liked each post.
@@ -577,9 +599,16 @@ export function pickRandomPost(posts) {
 
 // Return 4 random blog profiles.
 export function pickRandomBlogs(blogsObj) {
-  let blogs = Object.values(blogsObj);
-  if (blogs.length > 4) {
+  const blogValues = Object.values(blogsObj);
+  let blogs = [];
+  if (blogValues.length > 4) {
   } else {
+    blogValues.forEach((value) => {
+      blogs.push({
+        ...value,
+        id: uniqid(),
+      })
+    })
     return blogs;
   }
 }
@@ -595,13 +624,27 @@ export function sortLikedPosts(posts) {
 
 // Return post ids from post object.
 export function iterateIDs(postsObj) {
-    let postIDs = [];
-    let ids = Object.values(postsObj);
-    ids.forEach((el) => {
-      postIDs.push(el.id);
-    });
-    return postIDs;
+  let postIDs = [];
+  let ids = Object.values(postsObj);
+  ids.forEach((el) => {
+    postIDs.push(el.id);
+  });
+  return postIDs;
+}
+
+function createNotificationMsg(type, sender) {
+  let message;
+  if (type === "like") {
+    message = sender + " has liked your post.";
+  } else if (type === "follow") {
+    message = sender + " is now following you.";
+  } else if (type === "message") {
+    message = "You have a new message.";
+  } else {
+    message = "An error occurred.";
   }
+  return message;
+}
 
 /* ---------DISPLAY-------- */
 
@@ -623,10 +666,58 @@ export function toggleEdit() {
   document.querySelector("#editDescription").classList.toggle("show");
 }
 
+export function displayAccountTaken() {
+  document.getElementById("signUpError").innerHTML = "Account already exists.";
+}
+
+export function displaySignUpError() {
+  document.getElementById("signUpError").innerHTML =
+    "There was an error signing up. Please try again.";
+}
+
+export function displayUserTaken() {
+  document.getElementById("userNameError").innerHTML =
+    "Username is already taken. Please choose another.";
+}
+
 export function displayUpdate() {
   toggleEdit();
   document.querySelector("#updateInfo").innerHTML =
     "Profile successfully updated.";
+}
+
+export function toggleNotificationsDisplay() {
+  if (!document.getElementById("accountPopUp").classList.contains("hide")) {
+    document.getElementById("accountPopUp").classList.add("hide");
+  }
+  document.getElementById("notificationsPopUp").classList.toggle("hide");
+}
+
+export function toggleAccountDisplay() {
+  if (
+    !document.getElementById("notificationsPopUp").classList.contains("hide")
+  ) {
+    document.getElementById("notificationsPopUp").classList.add("hide");
+  }
+  document.getElementById("accountPopUp").classList.toggle("hide");
+}
+
+export function hidePopUps() {
+  if (
+    !document.getElementById("notificationsPopUp").classList.contains("hide")
+  ) {
+    document.getElementById("notificationsPopUp").classList.add("hide");
+  }
+  if (!document.getElementById("accountPopUp").classList.contains("hide")) {
+    document.getElementById("accountPopUp").classList.add("hide");
+  }
+}
+
+export function hideFollowButton(author) {
+  const buttons = document.querySelectorAll(`[data-key="${author}"]`);
+  buttons.forEach((button) => {
+    button.classList = "followBtn hide";
+  });
 }
 
 /* DATA */

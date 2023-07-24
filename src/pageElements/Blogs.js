@@ -8,6 +8,7 @@ const Blogs = ({ blogs, isFollowing }) => {
           <div
             style={{ display: "flex", justifyContent: "space-between" }}
             className="blogContainer"
+            key={blog.id}
           >
             <div
               style={{

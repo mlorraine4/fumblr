@@ -47,14 +47,6 @@ const ProfileSettings = () => {
     }
   }
 
-   function updateTitle(e) {
-     setTitle(e.target.value);
-   }
-
-   function updateDescription(e) {
-     setDescription(e.target.value);
-   }
-
   async function saveEdit() {
     if (newFile !== "") {
       await savePhoto(newFile);
@@ -156,13 +148,17 @@ const ProfileSettings = () => {
           <div id="editDescription" className="hide">
             <input
               placeholder="Title"
-              onChange={updateTitle}
+              onChange={(e) => {
+                 setTitle(e.target.value);
+              }}
               className="editProfile"
               id="titleInput"
             ></input>
             <input
               placeholder="Description"
-              onChange={updateDescription}
+              onChange={(e) => {
+                setDescription(e.target.value);
+              }}
               className="editProfile"
             ></input>
           </div>

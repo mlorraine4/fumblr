@@ -1,11 +1,16 @@
-import { hideFollowButton, saveFollow, toggleLikedStatus } from "../HelperFunctions";
+import {
+  hideFollowButton,
+  notifyUser,
+  saveFollow,
+  toggleLikedStatus,
+} from "../HelperFunctions";
 import ellipsis from "../images/more.png";
 import comment from "../images/chat.png";
 import repost from "../images/exchange.png";
 import share from "../images/send.png";
-
+import { getAuth } from "firebase/auth";
+// TODO: notify user after click of follow button and like button.
 const Posts = ({ posts, classNames, isFollowing }) => {
-
   if (posts) {
     return (
       <div id="posts">
@@ -21,7 +26,15 @@ const Posts = ({ posts, classNames, isFollowing }) => {
                       data-key={post.author}
                       className={isFollowing(post.author)}
                       onClick={() => {
-                        saveFollow(post.author);
+                        saveFollow(post.author).then(() => {
+                          notifyUser(
+                            "follow",
+                            getAuth().currentUser.displayName,
+                            post.author,
+                            ""
+                          );
+                        });
+
                         hideFollowButton(post.author);
                       }}
                     >
