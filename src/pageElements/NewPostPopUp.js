@@ -5,11 +5,10 @@ import {
   getStorage,
   getDownloadURL,
 } from "firebase/storage";
-import { ref as dbRef, child, push, update } from "firebase/database";
+import { ref as dbRef, child, push, update, serverTimestamp } from "firebase/database";
 import { db, storage } from "../firebase-config";
 import uniqid from "uniqid";
-// TODO: add drag and drop feature for adding photos
-// TODO: can only add one photo at a time right now
+
 const NewPostPopUp = ({ user }) => {
 
   function submitForm(e) {
@@ -79,6 +78,8 @@ const NewPostPopUp = ({ user }) => {
       starCount: 0,
       authorPic: user.photoURL,
       imgUrl: url,
+      timestamp: serverTimestamp,
+      descendingOrder: -1 * new Date().getTime(),
     };
 
     // Write the new post's data simultaneously in two database locations.

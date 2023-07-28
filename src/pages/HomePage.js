@@ -5,6 +5,8 @@ import { db, storage } from "../firebase-config";
 import {
   push,
   child,
+  query, 
+  orderByChild,
   ref as dbRef,
   update,
   getDatabase,
@@ -31,6 +33,7 @@ const HomePage = ({isFollowing}) => {
   const [user, loading, error] = useAuthState(auth);
   const [allPosts, setAllPosts] = useState([]);
 
+  // TODO: add sign up pop up for users trying to like/follow when they aren't logged in!
   // TODO: REMOVE THIS WHEN DONE ADDING POSTS BY OTHER USERS!
   function writeNewPost() {
     const postKey = push(child(dbRef(db), "posts")).key;
@@ -108,19 +111,33 @@ const HomePage = ({isFollowing}) => {
   }
 
   useEffect(() => {
-    if (loading) {
-      document.querySelector("#content").innerHTML = "Loading . . .";
-    }
-  }, [loading]);
-
-  useEffect(() => {
-    getPosts().then((snapshot) => {
-      if (snapshot.exists()) {
-        setAllPosts(iteratePosts(snapshot.val()));
+    if (user) {
+      // Listen for new notifications in database.
+      function postListener() {
+        const postsRef = query(
+          dbRef(db, "posts/"),
+          orderByChild("descendingOrder")
+        );
+        onValue(postsRef, (snapshot) => {
+          if (snapshot.exists()) {
+            setAllPosts(iteratePosts(snapshot.val()));
+          } else {
+            setAllPosts([]);
+          }
+        });
       }
-    });
-  }, []);
+      postListener();
+    } 
+  if (!user && !loading) {
+    // TODO: what do you want to see? posts without follow/like buttons? 
+  }
+  }, [user, loading]);
 
+  if (loading) {
+    return (
+      <div id="content">Loading...</div>
+    )
+  }
   if (user) {
     return (
       <>
@@ -145,7 +162,7 @@ const HomePage = ({isFollowing}) => {
       </>
     );
   }
-  if (!user) {
+  if (!user && !loading) {
     return (
       <>
         <div id="content">User is logged out.</div>

@@ -12,6 +12,7 @@ const UserPosts = ({isFollowing}) => {
   const [user, loading, error] = useAuthState(auth);
 
   useEffect(() => {
+    if (loading) {}
     if (user) {
       getUserPosts().then((snapshot) => {
         if (snapshot.exists()) {
@@ -20,7 +21,7 @@ const UserPosts = ({isFollowing}) => {
       })
     }
     if (!user) navigate("/fumblr/account/login");
-  }, [user, getUserPosts]);
+  }, [user, getUserPosts, loading]);
 
   if (loading) {
     return <div id="content">Loading . . .</div>;

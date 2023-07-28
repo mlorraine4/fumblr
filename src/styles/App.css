@@ -207,8 +207,9 @@ input::placeholder {
 }
 
 #content {
-  width: min-content;
   background-color: var(--background);
+  position: relative;
+  width: min-content;
 }
 
 #homePosts {
@@ -352,10 +353,6 @@ input::placeholder {
 .postAuthor {
   font-weight: bold;
   padding: 5px;
-}
-
-#inboxContent {
-  padding: 100px;
 }
 
 .postIconsContainer {
@@ -622,6 +619,18 @@ input::placeholder {
 
 /* INBOX PAGE */
 
+#newChatForm {
+  position: absolute;
+  top: 80px;
+  right: 0;
+  left: 0;
+  margin: auto;
+  width: 400px;
+  background-color: var(--background);
+  border: 1px solid var(--subtle);
+  z-index: 2;
+}
+
 .matchingDiv {
   padding: 10px;
   margin: 10px;
@@ -645,21 +654,104 @@ input::placeholder {
 }
 
 #messagesContainer {
-  background-color: var(--subtle);
-  width: 500px;
+  position: relative;
+  width: 80%;
   height: 500px;
+  border-radius: 8px;
 }
 
 #inboxContent {
   display: flex;
+  border: 1px solid var(--subtle);
+  width: 80vw;
+  margin: auto;
+}
+
+#chatListHeader {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 10px 0 10px;
+}
+
+#chatListContent {
+  border-right: 1px solid var(--subtle);
+  width: 20%;
 }
 
 .chatListElement {
   padding: 10px;
-  border-bottom: 1px solid var(--subtle);
-  margin-right: 20px;
 }
 
 .chatListElement:hover {
   background-color: var(--subtle);
+  cursor: pointer;
+}
+
+.chatHeader {
+  padding: 10px;
+  height: 50px;
+  font-size: 25px;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--subtle);
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.chatUserProfilePic {
+  height: 30px;
+  width: 30px;
+  margin: 5px 10px 5px 5px;
+  border-radius: 8px;
+}
+
+.messageContainer {
+  display: flex;
+  justify-content: right;
+  margin-right: 10px;
+  padding-top: 10px;
+}
+
+.messageUserName {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.otherUser {
+  color: var(--accent);
+  justify-content: left;
+  margin-left: 10px;
+}
+
+.active {
+  pointer-events: none;
+  background-color: var(--subtle);
+}
+
+#newChatBackground {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent);
+  border-radius: 8px;
+  height: 25px;
+  width: 25px;
+}
+
+#newChatIcon {
+  height: 20px;
+  width: 20px;
+}
+
+#messageForm {
+  position: absolute;
+  width: 100%;
+  top: 450px;
+  left: 0;
+  right: 0;
+}
+
+#messageInput {
+  width: 80%;
+  padding: 10px;
 }

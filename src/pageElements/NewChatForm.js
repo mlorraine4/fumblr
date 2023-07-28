@@ -1,34 +1,10 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { getUserNames } from "../HelperFunctions";
+import { findMatchingUsers, getUserNames, submitNewChatForm, toggleChatForm } from "../HelperFunctions";
 
-const NewMessageForm = ({ addChat }) => {
+const NewChatForm = ({ changeChat }) => {
   const [matchingUsers, setMatchingUsers] = useState([]);
-  // Users: all users in project
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(false);
-
-  function findMatchingUsers() {
-    let user = document.querySelector("#search").value;
-    let matchingUserNames = [];
-    users.forEach((el) => {
-      if (el.startsWith(user)) {
-        console.log(el);
-        matchingUserNames.push(el);
-      }
-    });
-    return matchingUserNames;
-  }
-
-  // Get selected user to start a new chat with.
-  function submitNewChatForm(e) {
-    e.preventDefault();
-    let user;
-    const data = new FormData(document.querySelector("#form"));
-    for (const entry of data) {
-      user = entry[1];
-      return user;
-    }
-  }
 
   useEffect(() => {
     let userNamesArray = [];
@@ -68,18 +44,21 @@ const NewMessageForm = ({ addChat }) => {
   }, [matchingUsers]);
 
   return (
-    <div id="newMessageForm" className="hide">
-      <div>New Message</div>
+    <div id="newChatForm" className="hide">
+      <div>
+        <div>New Message</div>
+        <button onClick={toggleChatForm}>x</button>
+      </div>
       <label htmlFor="search">To:</label>
       <input
         name="search"
         id="search"
         placeholder="Search..."
-        onChange={() => {
-          setMatchingUsers(findMatchingUsers());
+        onChange={(e) => {
+          setMatchingUsers(findMatchingUsers(e, users));
         }}
       ></input>
-      <form id="form">
+      <form id="chatForm">
         <div id="usersList">
           {matchingUsers.map((user, index) => {
             return (
@@ -103,7 +82,8 @@ const NewMessageForm = ({ addChat }) => {
           type="submit"
           id="chatBtn"
           onClick={(e) => {
-            addChat(submitNewChatForm(e));
+            changeChat(submitNewChatForm(e));
+            toggleChatForm();
           }}
         >
           Chat
@@ -113,4 +93,4 @@ const NewMessageForm = ({ addChat }) => {
   );
 };
 
-export default NewMessageForm;
+export default NewChatForm;

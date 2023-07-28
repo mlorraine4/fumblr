@@ -1,14 +1,7 @@
 import { Link } from "react-router-dom";
+import { setCurrentPage } from "../HelperFunctions";
 
 const SettingsNavBar = () => {
-
-  function setCurrentPage(e) {
-    let links = document.querySelectorAll(".navBarComponent");
-    links.forEach((link) => {
-      link.classList.remove("currentLink");
-    })
-    e.target.classList.add("currentLink");
-  }
 
     return (
       <div id="settingsNavBar">

@@ -6,7 +6,7 @@ import {
   getAuth,
   onAuthStateChanged,
 } from "firebase/auth";
-import { child, ref as dbRef, getDatabase, get, onValue } from "firebase/database";
+import { child, ref as dbRef, getDatabase, get, onValue, query, orderByChild } from "firebase/database";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import AccountSettings from "./pages/AccountSettings";
 import Inbox from "./pages/Inbox";
@@ -44,6 +44,7 @@ function App() {
   function initalizeFirebaseAuth() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log(-1690571073998 > -1690571100137);
         const uid = user.uid;
         setCurrentUser(user);
       } else {
@@ -53,22 +54,6 @@ function App() {
     });
   }
 
-  // Listen for new notifications in database.
-  function notificationListener() {
-    const notificationsRef = dbRef(
-      db,
-      "notifications/" + currentUser.displayName
-    );
-    onValue(notificationsRef, () => {
-      getUserNotifications().then((snapshot) => {
-        if (snapshot.exists()) {
-          setNotifications(iterateNotifications(snapshot.val()));
-        } else {
-          setNotifications([]);
-        }
-      });
-    });
-  }
 // TODO: might be unneccessary to save the notification id.
   function iterateNotifications(notificationsObj) {
     const notificationIDs = Object.keys(notificationsObj);
@@ -125,16 +110,36 @@ function App() {
 
   useEffect(() => {
     if (currentUser) {
+      console.log("app user logged in");
       getFollowers(currentUser).then((snapshot) => {
         if (snapshot.exists()) {
           iterateFollowers(snapshot.val());
         }
       });
-      getUserNotifications().then((snapshot) => {
-        if (snapshot.exists()) {
-          setNotifications(iterateNotifications(snapshot.val()));
-        }
-      });
+
+      // Listen for new notifications in database.
+      function notificationListener() {
+        const notificationsRef = query(
+          dbRef(db, "notifications/" + currentUser.displayName),
+          orderByChild("descendingOrder")
+        );
+        onValue(notificationsRef, (snapshot) => {
+          if (snapshot.exists()) {
+            let notifications = [];
+            snapshot.forEach((child) => {
+              notifications.push({ ...child.val(), notificationID: child.key });
+              if (
+                Object.values(snapshot.val()).length === notifications.length
+              ) {
+                setNotifications(notifications);
+              }
+            });
+          } else {
+            setNotifications([]);
+          }
+        });
+      }
+
       notificationListener();
     }
   }, [currentUser]);

@@ -3,14 +3,13 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-const Followers = ({followers}) => {
+const Followers = ({ followers }) => {
   const navigate = useNavigate();
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
 
   useEffect(() => {
     if (loading) {
-      document.querySelector("#followers").innerHTML = "Loading . . .";
     }
     if (!user) return navigate("/fumblr/account/login");
   }, [user, navigate, loading]);
@@ -32,7 +31,9 @@ const Followers = ({followers}) => {
         })}
       </div>
     );
-  } else return <div id="followers"></div>;
+  } else {
+    return <div id="followers">Loading . . .</div>;
+  }
 };
 
 export default Followers;

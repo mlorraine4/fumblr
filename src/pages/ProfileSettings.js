@@ -72,6 +72,7 @@ const ProfileSettings = () => {
   }
 
   useEffect(() => {
+    if (loading) {}
     if (!user) return navigate("/fumblr/account/login");
   }, [user, navigate]);
 

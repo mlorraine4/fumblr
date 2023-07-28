@@ -8,6 +8,10 @@ import {
   getDatabase,
   onValue,
   push,
+  serverTimestamp,
+  query,
+  orderByChild,
+  onChildAdded,
 } from "firebase/database";
 import {
   ref as storageRef,
@@ -55,7 +59,7 @@ export async function handleSignUp(email, password, displayName) {
         displayUserTaken();
       }
     }
-  })
+  });
 }
 
 // Get every username from database.
@@ -232,13 +236,10 @@ export function saveProfilePicture(photoURL) {
     });
 }
 
-// export function getUserProfilePic() {
-//   const user = getAuth().currentUser;
-//   const profileRef = dbRef(db, "profile-pictures/" + user.displayName);
-//   onValue(profileRef, (snapshot) => {
-//     const data = snapshot.val();
-//   });
-// }
+export async function getUserProfilePic(userDisplayName) {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-profiles/" + userDisplayName + "/photoURL"));
+}
 
 // Update user's email address.
 // export function updateUserEmail(email) {
@@ -280,7 +281,7 @@ export async function saveFollow(newUser) {
     following;
   updates["/user-info/" + newUser + "/followers/" + newFollowerKey] = follower;
 
-  return update(dbRef(db), updates)
+  return update(dbRef(db), updates);
 }
 
 // // Retrieve a post favorite count.
@@ -341,24 +342,48 @@ export async function getPosts() {
 }
 
 // Save a new notification for a user when another likes their post, follows them, or messages them.
-export async function notifyUser(type, sender, recipient, id) {
-  // ID: refers to the post's id for a like, the message id for a new message, and "" for follow.
-  const notification = createNotificationMsg(type, sender, recipient, id);
-  const updates = {};
-  const data = {
-    type: type,
-    sender: sender,
-    recipient: recipient,
-    id: id,
-    notification: notification,
-    seen: false,
-  };
+export async function notifyUser(type, sender, recipient, postID) {
+  // type: "message", "follow", "like"
+  // ID: refers to the post's id for a like, null for message or follow
+  if (type === "message") {
+    const notification = createNotificationMsg(type, sender, recipient, postID);
+    const updates = {};
+    const data = {
+      type: type,
+      sender: sender,
+      recipient: recipient,
+      postID: postID,
+      notification: notification,
+      seen: false,
+      descendingOrder: -1 * new Date().getTime(),
+    };
 
-  const key = sender + type + id;
+    const newMessageKey = push(
+      child(dbRef(db), "/notifications/" + recipient)
+    ).key;
 
-  updates["/notifications/" + recipient + "/" + key] = data;
+    updates["/notifications/" + recipient + "/" + newMessageKey] = data;
 
-  return update(dbRef(db), updates);
+    return update(dbRef(db), updates);
+  } else {
+    const notification = createNotificationMsg(type, sender, recipient, postID);
+    const updates = {};
+    const data = {
+      type: type,
+      sender: sender,
+      recipient: recipient,
+      postID: postID,
+      notification: notification,
+      seen: false,
+      descendingOrder: -1 * new Date().getTime(),
+    };
+
+    const key = sender + type + postID;
+
+    updates["/notifications/" + recipient + "/" + key] = data;
+
+    return update(dbRef(db), updates);
+  }
 }
 
 // Remove notification in database from user's list.
@@ -494,10 +519,62 @@ export async function getPost(id) {
 
 // Get a user's list of chat's.
 export async function getListOfChats() {
-   const user = getAuth().currentUser.displayName;
-   const ref = dbRef(getDatabase());
-   return get(child(ref, "chat-users/" + user));
- }
+  const user = getAuth().currentUser.displayName;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "chat-users/" + user));
+}
+
+//  Get chat messages between two users.
+export async function getChatMessages(id) {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "chat-messages/" + id));
+}
+
+export async function saveNewChat(recipient) {
+  const user = getAuth().currentUser;
+  const updates = {};
+  const newChatKey = push(child(dbRef(db), "/chat-messages/")).key;
+
+  updates["/chat-users/" + user.displayName + "/" + newChatKey] = {
+    user: recipient,
+  };
+  updates["/chat-users/" + recipient + "/" + newChatKey] = {
+    user: user.displayName,
+  };
+
+  return update(dbRef(db), updates);
+}
+
+export async function sendMessage(message, chatID) {
+  const user = getAuth().currentUser;
+  const newMessageKey = push(child(dbRef(db), "/chat-messages/" + chatID)).key;
+  const updates = {};
+  const messageData = {
+    message: message,
+    user: user.displayName,
+    timestamp: serverTimestamp(),
+    descendingOrder: -1 * new Date().getTime(),
+  };
+
+  updates["/chat-messages/" + chatID + "/" + newMessageKey] = messageData;
+
+  return update(dbRef(db), updates);
+}
+
+export async function loadMessages(chatID) {
+  // Remove previous messages.
+  document.querySelector("#chatMessages").innerHTML = "";
+
+  const messageRef = query(
+    dbRef(db, "chat-messages/" + chatID),
+    orderByChild("timestamp")
+  );
+  onChildAdded(messageRef, (snapshot) => {
+    if (snapshot.exists()) {
+      displayMessage(snapshot.val(), snapshot.key);
+    }
+  });
+}
 
 /* ---------HELPER FUNCTIONS-------- */
 
@@ -531,12 +608,7 @@ export async function toggleLikedStatus(e, post) {
     e.target.src = liked;
     e.target.setAttribute("class", "liked");
     addLike(post).then(() => {
-      notifyUser(
-        "like",
-        user,
-        post.author,
-        post.id
-      );
+      notifyUser("like", user, post.author, post.id);
     });
   } else {
     e.target.nextSibling.nextSibling.innerHTML =
@@ -544,12 +616,7 @@ export async function toggleLikedStatus(e, post) {
     e.target.src = like;
     e.target.setAttribute("class", "like");
     removeLike(post).then(() => {
-      removeNotification(
-        "like",
-        user,
-        post.author,
-        post.id
-      );
+      removeNotification("like", user, post.author, post.id);
     });
   }
 }
@@ -558,7 +625,6 @@ export async function toggleLikedStatus(e, post) {
 export function iteratePosts(postsObj) {
   const user = getAuth().currentUser;
   let postsArray = [];
-  let sortedArray = [];
   let posts = Object.values(postsObj);
   let ids = Object.keys(postsObj);
   posts.forEach((el) => {
@@ -581,10 +647,7 @@ export function iteratePosts(postsObj) {
       });
     }
   });
-  for (let i = postsArray.length - 1; i >= 0; i--) {
-    sortedArray.push(postsArray[i]);
-  }
-  return sortedArray;
+  return postsArray;
 }
 
 // Return a random blog post.
@@ -607,8 +670,8 @@ export function pickRandomBlogs(blogsObj) {
       blogs.push({
         ...value,
         id: uniqid(),
-      })
-    })
+      });
+    });
     return blogs;
   }
 }
@@ -639,11 +702,97 @@ function createNotificationMsg(type, sender) {
   } else if (type === "follow") {
     message = sender + " is now following you.";
   } else if (type === "message") {
-    message = "You have a new message.";
+    message = "You have a new message from " + sender;
   } else {
     message = "An error occurred.";
   }
   return message;
+}
+
+export function findMatchingUsers(e, users) {
+  const user = e.target.value;
+  let matchingUserNames = [];
+  if (user !== "") {
+    users.forEach((el) => {
+      if (el.startsWith(user)) {
+        matchingUserNames.push(el);
+      }
+    });
+  }
+  return matchingUserNames;
+}
+
+export function sendBtnHandler(e) {
+  const message = e.target.value;
+  if (message !== "") {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+export function userNameClass(user) {
+  if (user !== getAuth().currentUser.displayName) {
+    return "messageContainer otherUser";
+  } else {
+    return "messageContainer currentUser";
+  }
+}
+
+export function getChatDiv(user) {
+  const divs = document.querySelectorAll(".chatListElement");
+  let currentDiv;
+  divs.forEach((div) => {
+    if (div.innerHTML === user) {
+      currentDiv = div;
+    }
+  });
+  return currentDiv;
+}
+
+export function doesChatExist(user) {
+  let userFound = false;
+  let chats = document.querySelectorAll(".chatListElement");
+  chats.forEach((chat) => {
+    if (chat.innerHTML === user) {
+      userFound = true;
+    }
+  });
+  return userFound;
+}
+
+/* ----FORM SUBMIT HANDLERS------ */
+
+// Notify message recipient and save message to database.
+export function newMessageHandler(e, chatID, selectedUser) {
+  e.preventDefault();
+  const form = document.querySelector("#messageForm");
+  const message = document.querySelector("#messageInput").value;
+  sendMessage(message, chatID).then(
+    () => {
+      notifyUser(
+        "message",
+        getAuth().currentUser.displayName,
+        selectedUser,
+        null
+      );
+    },
+    (reason) => {
+      console.log(reason);
+    }
+  );
+  form.reset();
+}
+
+// Get selected user to start a new chat with.
+export function submitNewChatForm(e) {
+  e.preventDefault();
+  let user;
+  const data = new FormData(document.querySelector("#chatForm"));
+  for (const entry of data) {
+    user = entry[1];
+    return user;
+  }
 }
 
 /* ---------DISPLAY-------- */
@@ -718,6 +867,52 @@ export function hideFollowButton(author) {
   buttons.forEach((button) => {
     button.classList = "followBtn hide";
   });
+}
+
+export function setCurrentPage(e) {
+  let links = document.querySelectorAll(".navBarComponent");
+  links.forEach((link) => {
+    link.classList.remove("currentLink");
+  });
+  e.target.classList.add("currentLink");
+}
+
+export function toggleChatForm() {
+  document.querySelector("#newChatForm").classList.toggle("hide");
+  document.getElementById("content").classList.toggle("fade");
+  document.getElementById("content").classList.toggle("stop-scrolling");
+  document.getElementById("header").classList.toggle("fade");
+}
+
+// Displays a Message in the UI.
+function displayMessage(snapshot, id) {
+  let div = document.getElementById(id) || createAndInsertMsgDiv(id);
+
+  div.setAttribute("class", userNameClass(snapshot.user));
+
+  div.querySelector(".messageUserName").innerHTML = snapshot.user + ":";
+  div.querySelector(".message").innerHTML = snapshot.message;
+}
+
+function createAndInsertMsgDiv(id) {
+  const container = document.querySelector("#chatMessages");
+  const div = document.createElement("div");
+
+  div.setAttribute("id", id);
+  div.setAttribute("data-key", id);
+
+  const userNameDiv = document.createElement("div");
+  userNameDiv.setAttribute("class", "messageUserName");
+
+  div.appendChild(userNameDiv);
+
+  const messageDiv = document.createElement("div");
+  messageDiv.setAttribute("class", "message");
+
+  div.appendChild(messageDiv);
+  container.appendChild(div);
+
+  return div;
 }
 
 /* DATA */

@@ -50,12 +50,13 @@ const SavedPosts = ({ isFollowing }) => {
   }
 
   useEffect(() => {
+    if (loading) {}
     if (user) {
       loadPosts();
       listener();
     }
     if (!user) return navigate("/fumblr/account/login");
-  }, [user]);
+  }, [user, loading]);
 
   useEffect(() => {
     console.log(posts);

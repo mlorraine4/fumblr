@@ -41,10 +41,13 @@ const LogIn = () => {
   }
 
   useEffect(() => {
+    if (loading) {
+
+    } 
     if (!user) {
       return navigate("/");
     }
-  }, [user]);
+  }, [user, loading]);
 
   return (
     <>
