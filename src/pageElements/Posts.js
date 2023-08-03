@@ -9,7 +9,7 @@ import comment from "../images/chat.png";
 import repost from "../images/exchange.png";
 import share from "../images/send.png";
 import { getAuth } from "firebase/auth";
-// TODO: notify user after click of follow button and like button.
+
 const Posts = ({ posts, classNames, isFollowing }) => {
   if (posts) {
     return (

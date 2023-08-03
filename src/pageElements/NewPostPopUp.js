@@ -1,15 +1,15 @@
-import Button from "../Button";
 import {
-  ref as storageRef,
-  uploadBytes,
-  getStorage,
-  getDownloadURL,
-} from "firebase/storage";
-import { ref as dbRef, child, push, update, serverTimestamp } from "firebase/database";
-import { db, storage } from "../firebase-config";
-import uniqid from "uniqid";
+  ref as dbRef,
+  child,
+  push,
+  update,
+  serverTimestamp,
+} from "firebase/database";
+import { db } from "../firebase-config";
+import { getAuth } from "firebase/auth";
+import { savePicture, toggleTextOnlyPostForm, toggleWithPhotoPostForm, writeTextOnlyPost } from "../HelperFunctions";
 
-const NewPostPopUp = ({ user }) => {
+const NewPostWithPhotoForm = ({ user }) => {
 
   function submitForm(e) {
     e.preventDefault();
@@ -30,43 +30,64 @@ const NewPostPopUp = ({ user }) => {
     document.getElementById("postForm").reset();
   }
 
-  // Saves photo data to firebase cloud, passes img ref to get url.
-  function savePicture(title, body, file) {
-    const uid = user.uid;
+  return (
+    <div id="newPostWithPhotoForm" className="hide">
+      <img src={user.photoURL} id="newPostUserImg" alt=""></img>
+      <form id="withPhotoPostForm">
+        <input id="title" placeholder="title"></input>
+        <input id="body" placeholder="Your text here"></input>
+        <input type="file" id="fileInput"></input>
+        <div id="formError"></div>
+        <button onClick={toggleWithPhotoPostForm}>cancel</button>
+        <button onClick={submitForm}>post</button>
+      </form>
+    </div>
+  );
+};
 
-    // Get a key for a new Post.
+const NewPostTextOnlyForm = ({user}) => {
+
+  function submitForm(e) {
+    e.preventDefault();
+    let title = document.getElementById("title").value;
+    let body = document.getElementById("body").value;
+
     const newPostKey = push(child(dbRef(db), "posts")).key;
-    // Parent folder for all of post's images.
-    const imgFilePathName =
-      "posts/" + uid + "/" + newPostKey + "/" + uniqid() + file.name;
+    writeTextOnlyPost(title, body, newPostKey);
 
-    // Create a unique reference in cloud storage using the user's post key and user id.
-    const newImgRef = storageRef(storage, imgFilePathName);
-
-    uploadBytes(newImgRef, file)
-      .then((snapshot) => {
-        console.log("Uploaded a blob or file!");
-        getImgUrl(title, body, imgFilePathName, newPostKey);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    document.getElementById("postForm").reset();
   }
 
-  // Get post's img url from firebase storage.
-  function getImgUrl(title, body, imgFilePath, postKey) {
-    getDownloadURL(storageRef(storage, imgFilePath))
-      .then((url) => {
-        // `url` is the download URL for 'images/stars.jpg'
-        console.log("got img url");
-        writeNewPost(title, body, url, postKey);
-      })
-      .catch((error) => {
-        // Handle any errors
-      });
+  return (
+    <div id="newPostTextOnlyForm" className="hide">
+      <img src={user.photoURL} id="newPostUserImg" alt=""></img>
+      <form id="textOnlyPostForm">
+        <input id="title" placeholder="title"></input>
+        <input id="body" placeholder="Your text here"></input>
+        <input type="file" id="fileInput"></input>
+        <div id="formError"></div>
+        <button onClick={toggleTextOnlyPostForm}>cancel</button>
+        <button onClick={submitForm}>post</button>
+      </form>
+    </div>
+  );
+};
+
+// TODO: write for quotes
+const NewPostWithQuoteForm = ({user}) => {
+  function submitForm(e) {
+    e.preventDefault();
+    let title = document.getElementById("title").value;
+    let body = document.getElementById("body").value;
+
+    const newPostKey = push(child(dbRef(db), "posts")).key;
+    writeTextOnlyPost(title, body, newPostKey);
+
+    document.getElementById("postForm").reset();
   }
 
-  function writeNewPost(title, body, url, postKey) {
+  function writeTextOnlyPost(title, body, postKey) {
+    const user = getAuth().currentUser;
     const uid = user.uid;
 
     // A post entry.
@@ -77,9 +98,9 @@ const NewPostPopUp = ({ user }) => {
       title: title,
       starCount: 0,
       authorPic: user.photoURL,
-      imgUrl: url,
       timestamp: serverTimestamp,
       descendingOrder: -1 * new Date().getTime(),
+      imgUrl: "",
     };
 
     // Write the new post's data simultaneously in two database locations.
@@ -102,26 +123,26 @@ const NewPostPopUp = ({ user }) => {
   }
 
   function togglePostForm() {
-    document.getElementById("newPostPopUp").classList.toggle("hide");
+    document.getElementById("newPostTextOnlyForm").classList.toggle("hide");
     document.getElementById("content").classList.toggle("fade");
     document.getElementById("content").classList.toggle("stop-scrolling");
     document.getElementById("header").classList.toggle("fade");
-    document.getElementById("postForm").reset();
+    document.getElementById("textOnlyPostForm").reset();
   }
 
   return (
-    <div id="newPostPopUp" className="hide">
+    <div id="newPostTextOnlyForm" className="hide">
       <img src={user.photoURL} id="newPostUserImg" alt=""></img>
-      <form id="postForm">
+      <form id="textOnlyPostForm">
         <input id="title" placeholder="title"></input>
         <input id="body" placeholder="Your text here"></input>
         <input type="file" id="fileInput"></input>
         <div id="formError"></div>
         <button onClick={togglePostForm}>cancel</button>
-        <Button onClick={submitForm}>post</Button>
+        <button onClick={submitForm}>post</button>
       </form>
     </div>
   );
 };
 
-export default NewPostPopUp;
+export { NewPostWithPhotoForm, NewPostTextOnlyForm, NewPostWithQuoteForm };

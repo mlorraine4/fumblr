@@ -35,6 +35,7 @@ input[type="radio"] {
   appearance: none;
   background-color: var(--secondary-background);
   margin: 0;
+  padding: 0;
 }
 
 input[type="radio"]:checked+label {
@@ -60,6 +61,7 @@ button {
   border: none;
   padding: 5px;
   margin: 5px;
+  height: min-content;
 }
 
 button:hover {
@@ -78,10 +80,24 @@ input {
   border: none;
   border-radius: 12px;
   color: var(--text-primary);
+  padding: 5px;
+  margin: 5px;
+}
+
+input:autofill, input:-webkit-autofill {
+  border: 2px solid var(--text-primary);
+  padding: 3px;
 }
 
 input::placeholder {
   color: var(--faded);
+}
+
+#content {
+  background-color: var(--background);
+  position: relative;
+  min-width: min-content;
+  width: 100vw;
 }
 
 .fade {
@@ -92,6 +108,11 @@ input::placeholder {
 .stop-scrolling {
   height: calc(100vh - 80px);
   overflow: hidden;
+}
+
+.closeBtn {
+  background-color: var(--accent);
+  color: white;
 }
 
 .editBackground, .editProfileBackground {
@@ -176,8 +197,8 @@ input::placeholder {
 
 #notificationsPopUp {
   top: 45px;
-  left: -155px;
-  width: 285px;
+  left: -206px;
+  width: 320px;
 }
 
 .hide {
@@ -201,15 +222,58 @@ input::placeholder {
   background-color: var(--subtle);
 }
 
+.fullOpacity {
+  opacity: 1;
+}
+
+.noOpacity {
+  opacity: 0;
+}
+
+.notificationDot {
+  height: 10px;
+  width: 10px;
+}
+
+.deleteNotification, .notificationDotContainer {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* SIGN UP LOG IN PAGES */
+.logInBtn {
+  background-color: var(--text-secondary);
+  color: black;
+}
+
+.signUpBtn {
+  background-color: var(--accent);
+  color: white;
+}
+
+#signUpPage, #logInPage {
+  width: 100vw;
+}
+
+#logInContent, #signUpContent {
+  width: 175px;
+  margin: auto;
+}
+
+#logInForm, #signUpForm {
+  padding-bottom: 40px;
+}
+
+#logInError, #signUpError, #updateEmailError, #emailInfo {
+  height: 1.2em;
+  color: white;
+}
+
 /* HOME PAGE */
 #content, #followers {
   padding-top: 80px;
-}
-
-#content {
-  background-color: var(--background);
-  position: relative;
-  width: min-content;
 }
 
 #homePosts {
@@ -242,8 +306,8 @@ input::placeholder {
   height: auto;
 }
 
-/* NEW POST FORM */
-#newPostPopUp {
+/* NEW POST FORMS */
+#newPostWithPhotoForm, #newPostTextOnlyForm {
   position: absolute;
   height: 400px;
   border-radius: 12px;
@@ -309,7 +373,6 @@ input::placeholder {
   position: sticky;
   top: 64px;
   margin-top: 15px;
-  margin-left: 115px;
 }
 
 .newPostImg {
@@ -320,6 +383,10 @@ input::placeholder {
 #posts {
   color: var(--text-primary);
   text-align: center;
+}
+
+#homePagePosts {
+  margin-left: 115px;
 }
 
 .post {
@@ -369,7 +436,7 @@ input::placeholder {
   padding: 10px;
 }
 
-.postIcons:hover, .liked:hover, .like:hover, #logo:hover, .navBarIcons:hover, #headerNewPostIcon:hover {
+.postIcons:hover, .liked:hover, .like:hover, #logo:hover, .navBarIcons:hover, #headerNewPostIcon:hover, #logOutDiv:hover {
   cursor: pointer;
 }
 
@@ -382,18 +449,14 @@ input::placeholder {
   display: none;
 }
 
-.followBtn {
-  border-radius: 8px;
-  background-color: var(--accent);
-  color: white;
-  border-style: none;
-  height: min-content;
-  padding: 4px;
-}
-
 .followBtn:hover {
   background-color: var(--background);
   color: var(--accent);
+}
+
+#postPage {
+  width: min-content;
+  margin: auto;
 }
 
 /* FOLLOWERS PAGE */
@@ -449,6 +512,7 @@ input::placeholder {
   border-radius: 12px;
   margin: 10px;
   text-align: center;
+  background-color: var(--background);
 }
 
 #displayDescription {
@@ -492,6 +556,16 @@ input::placeholder {
 #profileTitle, #titleInput {
   font-weight: bold;
   font-size: 200%;
+}
+
+#profileTitle, #profileDescription {
+  background-color: var(--secondary-background);
+}
+
+#sketchPickerContainer {
+  position: absolute;
+  right: -245px;
+  top: 0;
 }
 
 /* SETTINGS NAVBAR */
@@ -566,12 +640,12 @@ input::placeholder {
   color: var(--text-light);
 }
 
-.followBtn, #refreshBtn {
+.accentBtn, .followBtn {
   background-color: var(--accent);
   color: white;
 }
 
-.followBtn:hover, #refreshBtn:hover {
+.accentBtn:hover {
   background-color: var(--accent-faded);
   color: white;
 }
@@ -755,3 +829,64 @@ input::placeholder {
   width: 80%;
   padding: 10px;
 }
+
+/* ACCOUNT SETTINGS */
+#accountPage {
+  color: var(--accent);
+  width: 80vw;
+  text-align: center;
+  position: relative;
+}
+
+#updateEmailContainer, #updatePasswordContainer {
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  background-color: var(--background);
+}
+
+#emailError {
+  opacity: 0;
+}
+
+#accountInfo {
+  padding: 40px;
+}
+
+#updateEmailForm {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  align-items: center;
+}
+
+#newEmail, #currentEmail, #confirmEmail {
+  width: 40%;
+}
+
+.flex-end {
+  display: flex;
+  width: 80%;
+  justify-content: space-between;
+  margin: auto;
+}
+
+.flex-left {
+  display: flex;
+}
+
+.accountSettingsHead {
+  width: 100px;
+  text-align: left;
+  font-weight: bold;
+}
+
+/* BLOG PAGE */
+
+#blogBackgroundPic {
+  height: 100px;
+  width: 100px;
+  border-radius: 64px;
+}
+

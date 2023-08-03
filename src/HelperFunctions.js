@@ -25,12 +25,46 @@ import {
   signOut,
   sendEmailVerification,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import like from "./images/like.png";
 import liked from "./images/liked.png";
 import uniqid from "uniqid";
+import { useDebugValue } from "react";
 
 /* ---------FIREBASE FUNCTIONS-------- */
+
+// Log in form submit.
+export function submitLogIn(e) {
+   e.preventDefault();
+   let email = e.target["email"].value;
+   let password = e.target["password"].value;
+   signInUserWithEmail(email, password);
+ }
+
+ // Sign in user with email and password.
+export function signInUserWithEmail(email, password) {
+  const auth = getAuth();
+   signInWithEmailAndPassword(auth, email, password)
+     .then((userCredential) => {
+       // Signed in
+       const user = userCredential.user;
+       // ...
+     })
+     .catch((error) => {
+       const errorCode = error.code;
+       const errorMessage = error.message;
+       console.log(errorMessage);
+       if (errorCode === "auth/user-not-found") {
+         document.getElementById("logInError").innerHTML =
+           "Account is not found. Sign up below!";
+       }
+       if (errorCode === "auth/wrong-password") {
+        document.getElementById("logInError").innerHTML =
+          "Email/password is incorrect.";
+       }
+     });
+ }
 
 // Sign up handler for adding a new user.
 export async function handleSignUp(email, password, displayName) {
@@ -60,11 +94,6 @@ export async function handleSignUp(email, password, displayName) {
       }
     }
   });
-}
-
-// Get every username from database.
-export async function getUserNames() {
-  return get(child(dbRef(db), "/allUserNames"));
 }
 
 // Send user a verification email.
@@ -147,43 +176,114 @@ export async function signOutUser() {
   return signOut(auth);
 }
 
-// User's profile information.
-// export function getUserProfile() {
-//   const auth = getAuth();
-//   const user = auth.currentUser;
-//   if (user !== null) {
-//     // The user object has basic properties such as display name, email, etc.
-//     const displayName = user.displayName;
-//     const email = user.email;
-//     const photoURL = user.photoURL;
-//     const emailVerified = user.emailVerified;
-//     // console.log("display name: " + displayName);
-//     // console.log("  email verified: " + emailVerified);
-//     // console.log("  Email: " + email);
-//     // console.log("  Photo URL: " + photoURL);
+export function writeTextOnlyPost(title, body, postKey) {
+  const user = getAuth().currentUser;
+  const uid = user.uid;
 
-//     // The user's ID, unique to the Firebase project. Do NOT use
-//     // this value to authenticate with your backend server, if
-//     // you have one. Use User.getToken() instead.
-//     const uid = user.uid;
-//   }
-// }
+  // A post entry.
+  const postData = {
+    author: user.displayName,
+    uid: uid,
+    body: body,
+    title: title,
+    starCount: 0,
+    authorPic: user.photoURL,
+    timestamp: serverTimestamp,
+    descendingOrder: -1 * new Date().getTime(),
+    imgUrl: "",
+  };
 
-// User's profile information linked to a sign-in provider.
-// export function getUserLinkedProfile() {
-//   const auth = getAuth();
+  // Write the new post's data simultaneously in two database locations.
+  const updates = {};
+  // Masterlist of all posts.
+  updates["/posts/" + postKey] = postData;
+  // Posts sorted by each user.
+  updates["/user-posts/" + user.displayName + "/" + postKey] = postData;
 
-//   const user = auth.currentUser;
-//   if (user !== null) {
-//     user.providerData.forEach((profile) => {
-//       // console.log("Sign-in provider: " + profile.providerId);
-//       // console.log("  Provider-specific UID: " + profile.uid);
-//       // console.log("  Name: " + profile.displayName);
-//       // console.log("  Email: " + profile.email);
-//       // console.log("  Photo URL: " + profile.photoURL);
-//     });
-//   }
-// }
+  // Saves multiple values to database.
+  update(dbRef(db), updates)
+    .then(() => {
+      // Data saved successfully!
+      console.log("post saved");
+    })
+    .catch((error) => {
+      // The write failed...
+      console.log(error);
+    });
+}
+
+// Saves a post's picture to cloud storage using database reference.
+export function savePicture(title, body, file) {
+  const user = getAuth().currentUser;
+  const uid = user.uid;
+
+  // Get a key for a new Post.
+  const newPostKey = push(child(dbRef(db), "posts")).key;
+  // Parent folder for all of post's images.
+  const imgFilePathName =
+    "posts/" + uid + "/" + newPostKey + "/" + uniqid() + file.name;
+
+  // Create a unique reference in cloud storage using the user's post key and user id.
+  const newImgRef = storageRef(storage, imgFilePathName);
+
+  uploadBytes(newImgRef, file)
+    .then((snapshot) => {
+      console.log("Uploaded a blob or file!");
+      getPostImgUrl(title, body, imgFilePathName, newPostKey);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+// Get post's img url from firebase storage.
+export function getPostImgUrl(title, body, imgFilePath, postKey) {
+  getDownloadURL(storageRef(storage, imgFilePath))
+    .then((url) => {
+      // `url` is the download URL for 'images/stars.jpg'
+      console.log("got img url");
+      writePostWithPhoto(title, body, url, postKey);
+    })
+    .catch((error) => {
+      // Handle any errors
+    });
+}
+
+export function writePostWithPhoto(title, body, url, postKey) {
+  const user = getAuth().currentUser;
+  const uid = user.uid;
+
+  // A post entry.
+  const postData = {
+    author: user.displayName,
+    uid: uid,
+    body: body,
+    title: title,
+    starCount: 0,
+    authorPic: user.photoURL,
+    imgUrl: url,
+    timestamp: serverTimestamp,
+    descendingOrder: -1 * new Date().getTime(),
+  };
+
+  // Write the new post's data simultaneously in two database locations.
+  const updates = {};
+  // Masterlist of all posts.
+  updates["/posts/" + postKey] = postData;
+  // Posts sorted by each user.
+  updates["/user-posts/" + user.displayName + "/" + postKey] = postData;
+
+  // Saves multiple values to database.
+  update(dbRef(db), updates)
+    .then(() => {
+      // Data saved successfully!
+      console.log("post saved");
+    })
+    .catch((error) => {
+      // The write failed...
+      console.log(error);
+    });
+}
 
 // Update name and photo for current user.
 export function updateUserProfile(displayName, photoURL) {
@@ -194,8 +294,7 @@ export function updateUserProfile(displayName, photoURL) {
   });
 }
 
-// TODO: get rid of both of these functions or rename to create generic user photo
-
+// Update profile photo in firebase auth.
 export function updateUserProfilePicture(photoURL) {
   const auth = getAuth();
   updateProfile(auth.currentUser, {
@@ -236,11 +335,6 @@ export function saveProfilePicture(photoURL) {
     });
 }
 
-export async function getUserProfilePic(userDisplayName) {
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-profiles/" + userDisplayName + "/photoURL"));
-}
-
 // Update user's email address.
 // export function updateUserEmail(email) {
 //   const auth = getAuth();
@@ -256,6 +350,8 @@ export async function getUserProfilePic(userDisplayName) {
 //     });
 // }
 
+// TODO: re-write using user's ref id from allusernames database-- might have to save that userid in app js
+// TODO: also re-write allusernames?
 // Save user following another to database.
 export async function saveFollow(newUser) {
   const auth = getAuth();
@@ -310,6 +406,8 @@ async function addLike(post) {
 
   const updates = {};
   updates["posts/" + post.id + "/favorites/" + uid] = userData;
+  updates["user-posts/" + post.author + "/" + post.id + "/favorites/" + uid] =
+    userData;
   updates["/user-info/" + user.displayName + "/liked-posts/" + post.id] =
     postData;
   updates["posts/" + post.id + "/starCount"] = increment(1);
@@ -327,6 +425,7 @@ async function removeLike(post) {
 
   const updates = {};
   updates["posts/" + post.id + "/favorites/" + uid] = null;
+  updates["user-posts/" + post.author + "/" + post.id + "/favorites/" + uid] = null;
   updates["/user-info/" + user.displayName + "/liked-posts/" + post.id] = null;
   updates["posts/" + post.id + "/starCount"] = increment(-1);
   updates["user-posts/" + post.author + "/" + post.id + "/starCount"] =
@@ -335,55 +434,27 @@ async function removeLike(post) {
   return update(dbRef(db), updates);
 }
 
-// Retrieve all posts from firebase database.
-export async function getPosts() {
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "posts"));
-}
-
 // Save a new notification for a user when another likes their post, follows them, or messages them.
-export async function notifyUser(type, sender, recipient, postID) {
+export async function notifyUser(type, sender, recipient, id) {
   // type: "message", "follow", "like"
-  // ID: refers to the post's id for a like, null for message or follow
-  if (type === "message") {
-    const notification = createNotificationMsg(type, sender, recipient, postID);
-    const updates = {};
-    const data = {
-      type: type,
-      sender: sender,
-      recipient: recipient,
-      postID: postID,
-      notification: notification,
-      seen: false,
-      descendingOrder: -1 * new Date().getTime(),
-    };
+  // ID: refers to the post's id for a like, message id for message, "" for follow
+  const notification = createNotificationMsg(type, sender, recipient, id);
+  const updates = {};
+  const data = {
+    type: type,
+    sender: sender,
+    recipient: recipient,
+    id: id,
+    notification: notification,
+    seen: false,
+    descendingOrder: -1 * new Date().getTime(),
+  };
 
-    const newMessageKey = push(
-      child(dbRef(db), "/notifications/" + recipient)
-    ).key;
+  const key = sender + type + id;
 
-    updates["/notifications/" + recipient + "/" + newMessageKey] = data;
+  updates["/notifications/" + recipient + "/" + key] = data;
 
-    return update(dbRef(db), updates);
-  } else {
-    const notification = createNotificationMsg(type, sender, recipient, postID);
-    const updates = {};
-    const data = {
-      type: type,
-      sender: sender,
-      recipient: recipient,
-      postID: postID,
-      notification: notification,
-      seen: false,
-      descendingOrder: -1 * new Date().getTime(),
-    };
-
-    const key = sender + type + postID;
-
-    updates["/notifications/" + recipient + "/" + key] = data;
-
-    return update(dbRef(db), updates);
-  }
+  return update(dbRef(db), updates);
 }
 
 // Remove notification in database from user's list.
@@ -394,31 +465,15 @@ export async function removeNotification(type, sender, recipient, id) {
   return update(dbRef(db), updates);
 }
 
-// Get a user's notifications.
-export async function getUserNotifications() {
-  const user = getAuth().currentUser;
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "notifications/" + user.displayName));
-}
-
-// Retreive users that current user is following in database.
-export async function getFollowers() {
-  const user = getAuth().currentUser;
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-info/" + user.displayName + "/following"));
-}
-
-// Get all user profiles from database.
-export async function getBlogs() {
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-profiles"));
-}
-
-// Retrieves all posts from firebase database.
-export async function getUserPosts() {
-  const user = getAuth().currentUser;
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-posts/" + user.displayName));
+export function markNotificationAsSeen(e, seen, sender, type, id, recipient) {
+  if (!seen) {
+    const key = sender + type + id;
+    const updates = {};
+    updates["/notifications/" + recipient + "/" + key + "/seen"] = true;
+    return update(dbRef(db), updates);
+  } else {
+    return;
+  }
 }
 
 // Save updated profile picture to firebase storage, and all references in database.
@@ -476,13 +531,6 @@ export async function updateUserPhoto(photoURL) {
   });
 }
 
-// Get all user posts' ids from database.
-export async function getUserPostIDs() {
-  const user = getAuth().currentUser;
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-posts/" + user.displayName));
-}
-
 // Update firebase database with new user photo.
 export async function updateDBWithNewPhoto(url, posts) {
   const user = getAuth().currentUser;
@@ -498,14 +546,139 @@ export async function updateDBWithNewPhoto(url, posts) {
   return update(dbRef(db), updates);
 }
 
+export function saveBackgroundColor(color) {
+    const user = getAuth().currentUser;
+    const updates = {};
+    updates["/user-profiles/" + user.displayName + "/backgroundColor"] = color;
+    return update(dbRef(db), updates);
+}
+
+export async function saveNewChat(recipient) {
+  const user = getAuth().currentUser;
+  const updates = {};
+  const newChatKey = push(child(dbRef(db), "/chat-messages/")).key;
+
+  updates["/chat-users/" + user.displayName + "/" + newChatKey] = {
+    user: recipient,
+  };
+  updates["/chat-users/" + recipient + "/" + newChatKey] = {
+    user: user.displayName,
+  };
+
+  return update(dbRef(db), updates);
+}
+
+export async function sendMessage(message, chatID, recipient) {
+  const user = getAuth().currentUser;
+  const newMessageKey = push(child(dbRef(db), "/chat-messages/" + chatID)).key;
+  const updates = {};
+  const messageData = {
+    id: newMessageKey,
+    message: message,
+    user: user.displayName,
+    timestamp: serverTimestamp(),
+    descendingOrder: -1 * new Date().getTime(),
+  };
+
+  updates["/chat-messages/" + chatID + "/" + newMessageKey] = messageData;
+
+  update(dbRef(db), updates).then(
+    () => {
+      notifyUser(
+        "message",
+        getAuth().currentUser.displayName,
+        recipient,
+        newMessageKey
+      );
+    },
+    (reason) => {
+      console.log(reason);
+    }
+  );
+}
+
+export async function loadMessages(chatID) {
+  // Remove previous messages.
+  document.querySelector("#chatMessages").innerHTML = "";
+
+  const messageRef = query(
+    dbRef(db, "chat-messages/" + chatID),
+    orderByChild("timestamp")
+  );
+  onChildAdded(messageRef, (snapshot) => {
+    if (snapshot.exists()) {
+      displayMessage(snapshot.val(), snapshot.key);
+    }
+  });
+}
+
+// Get every username from database.
+export async function getUserNames() {
+  return get(child(dbRef(db), "/allUserNames"));
+}
+
+//  TODO: replace get photoURL function for this one!
+//  Get profile picture url, blog title, and blog description for a user.
+export async function getUserProfileFromDB(userDisplayName) {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-profiles/" + userDisplayName));
+}
+
+// TODO: delete dup function
 // Get url of user's profile picture.
 export async function getProfilePic(user) {
   const ref = dbRef(getDatabase());
   return get(child(ref, "user-profiles/" + user + "/photoURL"));
 }
 
+// Get profile photo url from database.
+export async function getUserProfilePic(userDisplayName) {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-profiles/" + userDisplayName + "/photoURL"));
+}
+
+// Retrieve all posts from firebase database.
+export async function getPosts() {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "posts"));
+}
+
+// Get a user's notifications.
+export async function getUserNotifications() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "notifications/" + user.displayName));
+}
+
+// Retreive users that current user is following in database.
+export async function getFollowers() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-info/" + user.displayName + "/following"));
+}
+
+// Get all user profiles from database.
+export async function getBlogs() {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-profiles"));
+}
+
+// Retrieves all posts from firebase database.
+export async function getUserPosts() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-posts/" + user.displayName));
+}
+
+// Get current user's posts ids from database.
+export async function getUserPostIDs() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-posts/" + user.displayName));
+}
+
 // Get post references from a user's liked post list.
-export async function getIDs() {
+export async function getUserLikedPostsIDs() {
   const user = getAuth().currentUser;
   const ref = dbRef(getDatabase());
   return get(child(ref, "user-info/" + user.displayName + "/liked-posts"));
@@ -528,52 +701,6 @@ export async function getListOfChats() {
 export async function getChatMessages(id) {
   const ref = dbRef(getDatabase());
   return get(child(ref, "chat-messages/" + id));
-}
-
-export async function saveNewChat(recipient) {
-  const user = getAuth().currentUser;
-  const updates = {};
-  const newChatKey = push(child(dbRef(db), "/chat-messages/")).key;
-
-  updates["/chat-users/" + user.displayName + "/" + newChatKey] = {
-    user: recipient,
-  };
-  updates["/chat-users/" + recipient + "/" + newChatKey] = {
-    user: user.displayName,
-  };
-
-  return update(dbRef(db), updates);
-}
-
-export async function sendMessage(message, chatID) {
-  const user = getAuth().currentUser;
-  const newMessageKey = push(child(dbRef(db), "/chat-messages/" + chatID)).key;
-  const updates = {};
-  const messageData = {
-    message: message,
-    user: user.displayName,
-    timestamp: serverTimestamp(),
-    descendingOrder: -1 * new Date().getTime(),
-  };
-
-  updates["/chat-messages/" + chatID + "/" + newMessageKey] = messageData;
-
-  return update(dbRef(db), updates);
-}
-
-export async function loadMessages(chatID) {
-  // Remove previous messages.
-  document.querySelector("#chatMessages").innerHTML = "";
-
-  const messageRef = query(
-    dbRef(db, "chat-messages/" + chatID),
-    orderByChild("timestamp")
-  );
-  onChildAdded(messageRef, (snapshot) => {
-    if (snapshot.exists()) {
-      displayMessage(snapshot.val(), snapshot.key);
-    }
-  });
 }
 
 /* ---------HELPER FUNCTIONS-------- */
@@ -768,19 +895,7 @@ export function newMessageHandler(e, chatID, selectedUser) {
   e.preventDefault();
   const form = document.querySelector("#messageForm");
   const message = document.querySelector("#messageInput").value;
-  sendMessage(message, chatID).then(
-    () => {
-      notifyUser(
-        "message",
-        getAuth().currentUser.displayName,
-        selectedUser,
-        null
-      );
-    },
-    (reason) => {
-      console.log(reason);
-    }
-  );
+  sendMessage(message, chatID, selectedUser);
   form.reset();
 }
 
@@ -797,11 +912,20 @@ export function submitNewChatForm(e) {
 
 /* ---------DISPLAY-------- */
 
-export function togglePostForm() {
-  document.getElementById("newPostPopUp").classList.toggle("hide");
+export function toggleTextOnlyPostForm() {
+  document.getElementById("newPostTextOnlyForm").classList.toggle("hide");
   document.getElementById("content").classList.toggle("fade");
   document.getElementById("content").classList.toggle("stop-scrolling");
   document.getElementById("header").classList.toggle("fade");
+  document.getElementById("textOnlyPostForm").reset();
+}
+
+export function toggleWithPhotoPostForm() {
+  document.getElementById("newPostWithPhotoForm").classList.toggle("hide");
+  document.getElementById("content").classList.toggle("fade");
+  document.getElementById("content").classList.toggle("stop-scrolling");
+  document.getElementById("header").classList.toggle("fade");
+  document.getElementById("withPhotoPostForm").reset();
 }
 
 export function toggleEdit() {

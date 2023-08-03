@@ -12,26 +12,17 @@ import {
   hidePopUps,
   toggleAccountDisplay,
   toggleNotificationsDisplay,
-  togglePostForm,
+  toggleTextOnlyPostForm,
 } from "../HelperFunctions";
-import NewPostPopUp from "./NewPostPopUp";
+import { NewPostTextOnlyForm } from "./NewPostPopUp";
 import { useEffect } from "react";
 
 const Header = ({ user, notifications }) => {
-  useEffect(() => {
-    if (document.querySelector("#notificationIcon")) {
-      if (notifications.length !== 0) {
-        document.querySelector("#notificationIcon").style.opacity = 1;
-      } else {
-        document.querySelector("#notificationIcon").style.opacity = 0;
-      }
-    }
-  }, [notifications]);
 
-  if (user !== null) {
+  if (user) {
     return (
       <>
-        <NewPostPopUp user={user} />
+        <NewPostTextOnlyForm user={user} />
         <div id="header">
           <div style={{ display: "flex" }}>
             <img id="logo" alt="" src={logo}></img>
@@ -78,7 +69,7 @@ const Header = ({ user, notifications }) => {
                 className="navBarIcons"
                 onClick={toggleNotificationsDisplay}
               ></img>
-              <div id="notificationIcon">{notifications.length}</div>
+              <div id="notificationIcon"></div>
               <NotificationsPopUp user={user} notifications={notifications} />
             </div>
             <div id="headerEditBackground">
@@ -87,7 +78,7 @@ const Header = ({ user, notifications }) => {
                 src={edit}
                 alt=""
                 id="headerNewPostIcon"
-                onClick={togglePostForm}
+                onClick={toggleTextOnlyPostForm}
               ></img>
             </div>
           </div>
@@ -97,14 +88,18 @@ const Header = ({ user, notifications }) => {
   } else {
     return (
       <div id="header">
-        <img id="logo" alt="" src={logo}></img>
-        <div>Search Bar</div>
-        <Link to={"/fumblr/account/login"}>
-          <Button>Log In</Button>
-        </Link>
-        <Link to={"/fumblr/account/signup"}>
-          <Button>Sign Up</Button>
-        </Link>
+        <div style={{ display: "flex" }}>
+          <img id="logo" alt="" src={logo}></img>
+          <input placeholder="Search Fumblr" id="searchBar"></input>
+        </div>
+        <div>
+          <Link to={"/fumblr/account/login"}>
+            <button className="logInBtn">Log In</button>
+          </Link>
+          <Link to={"/fumblr/account/signup"}>
+            <button className="signUpBtn">Sign Up</button>
+          </Link>
+        </div>
       </div>
     );
   }

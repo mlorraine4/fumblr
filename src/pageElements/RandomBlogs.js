@@ -1,6 +1,6 @@
 import { saveFollow } from "../HelperFunctions";
 
-const Blogs = ({ blogs, isFollowing }) => {
+const RandomBlogs = ({ blogs, isFollowing }) => {
   return (
     <div id="randomBlogsContent">
       {blogs.map((blog) => {
@@ -47,4 +47,4 @@ const Blogs = ({ blogs, isFollowing }) => {
   );
 };
 
-export default Blogs;
+export default RandomBlogs;

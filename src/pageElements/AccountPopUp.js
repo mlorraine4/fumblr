@@ -1,11 +1,10 @@
 import { signOutUser, toggleAccountDisplay } from "../HelperFunctions";
 import { Link } from "react-router-dom";
 
-const AccountPopUp = () => {
+const AccountPopUp = ({ user }) => {
   return (
     <div id="accountPopUp" className="hide">
       <div
-        className="accountPopUpItem"
         style={{
           display: "flex",
           justifyContent: "space-around",
@@ -13,18 +12,13 @@ const AccountPopUp = () => {
         }}
       >
         <div>Account</div>
-        <div id="logOutBtn" onClick={signOutUser}>
+        <div id="logOutDiv" onClick={signOutUser}>
           Log Out
         </div>
       </div>
-      <Link to={"/fumblr/posts/user"}>
+      <Link>
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
-          Posts
-        </div>
-      </Link>
-      <Link to={"/fumblr/account/followers"}>
-        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
-          Followers
+          Following
         </div>
       </Link>
       <Link to="/fumblr/account/liked-posts">
@@ -33,8 +27,25 @@ const AccountPopUp = () => {
         </div>
       </Link>
       <Link to={"/fumblr/settings/account"}>
-        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
+        <div
+          className="accountPopUpItem"
+          onClick={toggleAccountDisplay}
+          style={{ borderBottom: "0.5px solid var(--text-primary)" }}
+        >
           Settings
+        </div>
+      </Link>
+      <Link to={`/fumblr/blog/${user.displayName}`}>
+        <div>{user.displayName}'s Blog</div>
+      </Link>
+      <Link to={"/fumblr/account/posts"}>
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
+          Posts
+        </div>
+      </Link>
+      <Link to={"/fumblr/account/followers"}>
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
+          Followers
         </div>
       </Link>
     </div>

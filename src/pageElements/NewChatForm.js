@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { findMatchingUsers, getUserNames, submitNewChatForm, toggleChatForm } from "../HelperFunctions";
 
 const NewChatForm = ({ changeChat }) => {
@@ -10,9 +10,9 @@ const NewChatForm = ({ changeChat }) => {
     let userNamesArray = [];
     getUserNames().then((snapshot) => {
       if (snapshot.exists()) {
-        Object.values(snapshot.val()).forEach((el) => {
-          userNamesArray.push(el.userName);
-        });
+        snapshot.forEach((child) => {
+          userNamesArray.push(child.val().userName);
+        })
         setUsers(userNamesArray);
       }
     });

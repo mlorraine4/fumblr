@@ -19,6 +19,8 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Followers from "./pages/Followers";
 import SavedPosts from "./pages/SavedPosts";
 import { getFollowers, getProfilePic, getUserNotifications } from "./HelperFunctions";
+import Blog from "./pages/Blog";
+import Post from "./pages/Post";
 
 /*                                              -----TO DO LIST-----
   1. notification functionality (user has new follower, user's post has a new like, user recieves new message)
@@ -37,6 +39,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [followers, setFollowers] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [newNotifications, setNewNotifications] = useState([]);
   const [theme, setTheme] = useState("default");
 
   // TODO: LEAVE ALL FUNCTIONS IN APP.
@@ -44,7 +47,6 @@ function App() {
   function initalizeFirebaseAuth() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(-1690571073998 > -1690571100137);
         const uid = user.uid;
         setCurrentUser(user);
       } else {
@@ -52,20 +54,6 @@ function App() {
         setCurrentUser(user);
       }
     });
-  }
-
-// TODO: might be unneccessary to save the notification id.
-  function iterateNotifications(notificationsObj) {
-    const notificationIDs = Object.keys(notificationsObj);
-    const notifications = Object.values(notificationsObj);
-    let notificationsArray = [];
-    notifications.forEach((notification, index) => {
-      notificationsArray.push({
-        ...notification,
-        notificationID: notificationIDs[index]
-      })
-    })
-    return notificationsArray;
   }
 
   // Get each follower's profile picture and add to followers array.
@@ -104,6 +92,15 @@ function App() {
     }
   }
 
+  function updateNotificationIcon(newNotificationArray) {
+    if (newNotificationArray.length === 0) {
+      document.querySelector("#notificationIcon").style.opacity = 0;
+    } else {
+      document.querySelector("#notificationIcon").style.opacity = 1;
+      document.querySelector("#notificationIcon").innerHTML = newNotificationArray.length;
+    }
+  }
+
   const firebaseAppConfig = getFirebaseConfig();
   initializeApp(firebaseAppConfig);
   initalizeFirebaseAuth();
@@ -126,16 +123,23 @@ function App() {
         onValue(notificationsRef, (snapshot) => {
           if (snapshot.exists()) {
             let notifications = [];
+            let newNotifications = [];
             snapshot.forEach((child) => {
-              notifications.push({ ...child.val(), notificationID: child.key });
+              if (!child.val().seen) {
+                newNotifications.push(child.val())
+              }
+              notifications.push(child.val());
               if (
                 Object.values(snapshot.val()).length === notifications.length
               ) {
                 setNotifications(notifications);
+                setNewNotifications(newNotifications);
+                updateNotificationIcon(newNotifications);
               }
             });
           } else {
             setNotifications([]);
+            updateNotificationIcon([]);
           }
         });
       }
@@ -147,7 +151,11 @@ function App() {
   return (
     <div className="App" data-theme={"dark"}>
       <HashRouter>
-        <Header user={currentUser} notifications={notifications} />
+        <Header
+          user={currentUser}
+          notifications={notifications}
+          newNotifications={newNotifications}
+        />
         <Routes>
           <Route
             path={"/"}
@@ -168,14 +176,12 @@ function App() {
             element={<AccountSettings user={currentUser} />}
           ></Route>
           <Route
-            // TODO: how to put user display name after blog?
             path={"/fumblr/settings/blog"}
             element={<ProfileSettings />}
           ></Route>
           <Route path={"/fumblr/inbox"} element={<Inbox />}></Route>
           <Route
-            // TODO: how to make dynamic links using user name (want user = display name)
-            path={"/fumblr/posts/user"}
+            path={"/fumblr/account/posts"}
             element={<UserPosts isFollowing={isFollowing} />}
           ></Route>
           <Route
@@ -185,6 +191,14 @@ function App() {
           <Route
             path={"/fumblr/account/liked-posts"}
             element={<SavedPosts isFollowing={isFollowing} />}
+          ></Route>
+          <Route
+            path="fumblr/blog/:user"
+            element={<Blog isFollowing={isFollowing} />}
+          ></Route>
+          <Route
+            path="fumblr/post/:id"
+            element={<Post isFollowing={isFollowing} user={currentUser}/>}
           ></Route>
         </Routes>
       </HashRouter>

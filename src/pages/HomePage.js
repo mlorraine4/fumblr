@@ -1,17 +1,20 @@
 import NewPostButtons from "../pageElements/NewPostButtons";
-import NewPostPopUp from "../pageElements/NewPostPopUp";
+import {
+  NewPostTextOnlyForm,
+  NewPostWithPhotoForm,
+} from "../pageElements/NewPostPopUp";
 import NewBlogsToFollow from "../pageElements/NewBlogsToFollow";
 import { db, storage } from "../firebase-config";
 import {
   push,
   child,
-  query, 
+  query,
   orderByChild,
   ref as dbRef,
   update,
   getDatabase,
   get,
-  onValue
+  onValue,
 } from "firebase/database";
 import uniqid from "uniqid";
 import {
@@ -25,10 +28,11 @@ import { useState, useEffect } from "react";
 import UserPosts from "./UserPosts";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { MainPostClassNames, getPosts, iteratePosts } from "../HelperFunctions";
+import { MainPostClassNames } from "../HelperFunctions";
 import Posts from "../pageElements/Posts";
+import { Link } from "react-router-dom";
 
-const HomePage = ({isFollowing}) => {
+const HomePage = ({ isFollowing }) => {
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
   const [allPosts, setAllPosts] = useState([]);
@@ -112,45 +116,62 @@ const HomePage = ({isFollowing}) => {
 
   useEffect(() => {
     if (user) {
-      // Listen for new notifications in database.
-      function postListener() {
-        const postsRef = query(
-          dbRef(db, "posts/"),
-          orderByChild("descendingOrder")
-        );
-        onValue(postsRef, (snapshot) => {
-          if (snapshot.exists()) {
-            setAllPosts(iteratePosts(snapshot.val()));
-          } else {
-            setAllPosts([]);
-          }
-        });
-      }
-      postListener();
-    } 
-  if (!user && !loading) {
-    // TODO: what do you want to see? posts without follow/like buttons? 
-  }
+      // Listen for new posts in database.
+      // TODO: might not want to randomly update when user is scrolling
+      const postsRef = query(
+        dbRef(db, "posts/"),
+        orderByChild("descendingOrder")
+      );
+      onValue(postsRef, (snapshot) => {
+        let postsArray = [];
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            if (
+              child.val().favorites !== undefined &&
+              Object.keys(child.val().favorites).includes(user.uid)
+            ) {
+              postsArray.push({
+                ...child.val(),
+                id: child.key,
+                src: liked,
+                className: "liked",
+              });
+            } else {
+              postsArray.push({
+                ...child.val(),
+                id: child.key,
+                src: like,
+                className: "like",
+              });
+            }
+          });
+          setAllPosts(postsArray);
+        } else {
+          setAllPosts([]);
+        }
+      });
+    }
   }, [user, loading]);
 
   if (loading) {
-    return (
-      <div id="content">Loading...</div>
-    )
+    return <div id="content">Loading...</div>;
   }
   if (user) {
     return (
       <>
-        <NewPostPopUp user={user} />
+        <NewPostTextOnlyForm user={user} />
+        <NewPostWithPhotoForm user={user} />
         <div id="content">
           <div style={{ display: "flex" }}>
             <div id="homePosts">
               <NewPostButtons user={user} />
-              <Posts
-                posts={allPosts}
-                classNames={MainPostClassNames}
-                isFollowing={isFollowing}
-              />
+              <div id="homePagePosts">
+                <Posts
+                  posts={allPosts}
+                  classNames={MainPostClassNames}
+                  isFollowing={isFollowing}
+                />
+              </div>
             </div>
             <div id="homeNewBlogs">
               <NewBlogsToFollow isFollowing={isFollowing} posts={allPosts} />
@@ -158,11 +179,15 @@ const HomePage = ({isFollowing}) => {
           </div>
           {/* <button onClick={writeNewPost}>add post</button> */}
           <div>Footer</div>
+          <Link to={`/fumblr/blog/${user.displayName}`}>
+            <button>go to blog</button>
+          </Link>
         </div>
       </>
     );
   }
   if (!user && !loading) {
+    // TODO: what do you want to see? posts without follow/like buttons?
     return (
       <>
         <div id="content">User is logged out.</div>

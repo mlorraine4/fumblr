@@ -4,9 +4,9 @@ import Posts from "../pageElements/Posts";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
-import { MainPostClassNames, getIDs, getPost, iterateIDs, sortLikedPosts } from "../HelperFunctions";
+import { MainPostClassNames, getPost } from "../HelperFunctions";
 import { db } from "../firebase-config";
-import { ref as dbRef, onValue } from "firebase/database";
+import { ref as dbRef, onValue, orderByChild, query } from "firebase/database";
 
 const SavedPosts = ({ isFollowing }) => {
   const auth = getAuth();
@@ -15,52 +15,43 @@ const SavedPosts = ({ isFollowing }) => {
   const [hasLikes, setHasLikes] = useState(true);
   const [user, loading, error] = useAuthState(auth);
 
-  function loadPosts() {
-    const postArray = [];
-
-    getIDs().then((snapshot) => {
+  function listener() {
+    const likedPostsRef = query(
+      dbRef(db, "user-info/" + user.displayName + "/liked-posts"),
+      orderByChild("descendingOrder")
+    );
+    onValue(likedPostsRef, (snapshot) => {
+      let postsArray = [];
       if (snapshot.exists()) {
-        let ids = iterateIDs(snapshot.val());
-        ids.forEach((id) => {
-          getPost(id).then((postSnapshot) => {
+        snapshot.forEach((child) => {
+          getPost(child.val().id).then((postSnapshot) => {
             if (postSnapshot.exists()) {
-              postArray.push({
+              postsArray.push({
                 ...postSnapshot.val(),
-                id: id,
+                id: child.val().id,
                 src: liked,
                 className: "liked",
               });
-              if (postArray.length === ids.length) {
-                setPosts(sortLikedPosts(postArray));
-              }
             }
-          })
-        })
+          });
+        });
+        setPosts(postsArray);
       } else {
         setHasLikes(false);
       }
     });
   }
 
-  function listener() {
-    const likedPostsRef = dbRef(db, "user-info/" + user.displayName + "/liked-posts");
-    onValue(likedPostsRef, () => {
-      loadPosts();
-    });
-  }
-
   useEffect(() => {
-    if (loading) {}
     if (user) {
-      loadPosts();
       listener();
     }
-    if (!user) return navigate("/fumblr/account/login");
+    if (!user && !loading) return navigate("/fumblr/account/login");
   }, [user, loading]);
 
   useEffect(() => {
     console.log(posts);
-  }, [posts])
+  }, [posts]);
 
   if (loading) {
     return <div id="content">Loading . . .</div>;

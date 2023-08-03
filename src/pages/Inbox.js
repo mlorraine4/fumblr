@@ -169,7 +169,7 @@ const Inbox = () => {
                   ></img>
                 </div>
               </div>
-              <div style={{ margin: "10px 0 10px" }}>Messages</div>
+              <div style={{ margin: "10px 0 10px", fontWeight: "bold", fontSize: "1.2em" }}>Messages</div>
               <div id="chatList"></div>
               {/* {chats.map((el, index) => {
                 return (

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Blogs from "./Blogs";
 import Posts from "./Posts";
 import {
   RadarClassNames,
@@ -7,6 +6,7 @@ import {
   pickRandomBlogs,
   pickRandomPost,
 } from "../HelperFunctions";
+import RandomBlogs from "./RandomBlogs";
 
 const NewBlogsToFollow = ({ posts, isFollowing }) => {
   const [randomBlogs, setRandomBlogs] = useState([]);
@@ -33,13 +33,13 @@ const NewBlogsToFollow = ({ posts, isFollowing }) => {
     <>
       <div className="newBlogsContainer">
         <div className="newBlogsTitle">Check out these bloggers</div>
-        <Blogs blogs={randomBlogs} isFollowing={isFollowing} />
+        <RandomBlogs blogs={randomBlogs} isFollowing={isFollowing} />
       </div>
       <div className="newBlogsContainer">
         <div className="newBlogsTitle">
           <div>Radar</div>
           <button
-            id="refreshBtn"
+            className="accentBtn"
             onClick={() => {
               setRandomPost(pickRandomPost(posts));
             }}

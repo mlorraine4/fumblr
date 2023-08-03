@@ -11,8 +11,8 @@ const Messages = ({ selectedUser, userProfile, chatID }) => {
   if (!chatID) {
     return (
       <div id="messagesContainer">
-        <div>Start chatting now.</div>
-        <button onClick={toggleChatForm}>send message</button>
+        <div style={{padding: "50px"}}>Start chatting now.</div>
+        <button onClick={toggleChatForm} className="accentBtn">send message</button>
         <div id="chatMessages"></div>
       </div>
     );

@@ -9,9 +9,7 @@ const Followers = ({ followers }) => {
   const [user, loading, error] = useAuthState(auth);
 
   useEffect(() => {
-    if (loading) {
-    }
-    if (!user) return navigate("/fumblr/account/login");
+    if (!user & !loading) return navigate("/fumblr/account/login");
   }, [user, navigate, loading]);
 
   if (user) {

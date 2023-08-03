@@ -2,48 +2,61 @@ import { useEffect } from "react";
 import Button from "../Button";
 import { Link, useNavigate } from "react-router-dom";
 import { submitSignUpForm } from "../HelperFunctions";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { getAuth } from "firebase/auth";
 
-const SignUp = ({ user }) => {
+const SignUp = () => {
+  const auth = getAuth();
   const navigate = useNavigate();
+  const [user, loading, error] = useAuthState(auth);
 
   useEffect(() => {
     if (user && user.emailVerified) {
       return navigate("/");
     }
-  }, [navigate, user]);
+  }, [user, navigate]);
 
-  if (user === null) {
+  if (!user) {
     return (
-      <>
-        <form onSubmit={submitSignUpForm}>
-          <div>Sign Up</div>
-          <input type="email" placeholder="email" id="email"></input>
-          <input type="password" placeholder="password" id="password"></input>
-          <input
-            placeholder="confirm your password"
-            id="confirmPassword"
-          ></input>
-          <input placeholder="username"></input>
-          <div id="userNameError"></div>
-          <Button type="submit">Sign Up</Button>
-          <Button>x</Button>
-          <div id="signUpError"></div>
-        </form>
-        <>
-          <div>Have an account?</div>
-          <Link to="/fumblr/account/login">
-            <Button>Log In</Button>
-          </Link>
-        </>
-      </>
+      <div id="content">
+        <div id="signUpPage">
+          <div id="signUpContent">
+            <form id="signUpForm" onSubmit={submitSignUpForm}>
+              <div>Sign Up</div>
+              <input type="email" placeholder="email" id="email"></input>
+              <input
+                type="password"
+                placeholder="password"
+                id="password"
+              ></input>
+              <input
+                placeholder="confirm your password"
+                id="confirmPassword"
+              ></input>
+              <input placeholder="username"></input>
+              <div id="userNameError"></div>
+              <button type="submit" className="signUpBtn">
+                Sign Up
+              </button>
+              <div id="signUpError"></div>
+            </form>
+            <>
+              <div>Have an account?</div>
+              <Link to="/fumblr/account/login">
+                <button className="logInBtn">Log In</button>
+              </Link>
+            </>
+          </div>
+        </div>
+      </div>
     );
   } else {
     return (
-      <>
-        <div id="emailMsg"></div>
+      <div id="content">
+        <div id="emailMsg">Your email isn't verified yet. Verify your account to post on Fumblr.</div>
         <Button>Resend Email</Button>
         <Button>Return to Dashboard</Button>
-      </>
+      </div>
     );
   }
 };

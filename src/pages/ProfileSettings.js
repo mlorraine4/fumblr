@@ -1,23 +1,17 @@
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
-import {
-  ref as dbRef,
-  update,
-  get,
-  child,
-  getDatabase,
-} from "firebase/database";
-import { db, storage } from "../firebase-config";
-import { updateProfile, getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import edit from "../images/edit.png";
 import SettingsNavBar from "../pageElements/SettingsNavBar";
-import { displayUpdate, getImgUrl, getUserPostIDs, saveDescription, savePhoto, saveTitle, toggleEdit, updateDBWithNewPhoto, updateUserPhoto } from "../HelperFunctions";
+import {
+  saveBackgroundColor,
+  saveDescription,
+  savePhoto,
+  saveTitle,
+  toggleEdit,
+} from "../HelperFunctions";
+import { SketchPicker } from "react-color";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -26,6 +20,7 @@ const ProfileSettings = () => {
   const [newFile, setNewFile] = useState("");
   const [title, setTitle] = useState("Title");
   const [description, setDescription] = useState("Description");
+  const [background, setBackground] = useState("#fff");
 
   // Read image file selected from input and display new img for user.
   async function getImg() {
@@ -59,6 +54,13 @@ const ProfileSettings = () => {
     }
   }
 
+  function handleChange(color) {
+    console.log(color);
+    setBackground(color.hex);
+  }
+
+  function handleChangeComplete() {}
+
   function cancelUpload() {
     toggleEdit();
     document.querySelector("#userProfileImg").src = user.photoURL;
@@ -71,22 +73,38 @@ const ProfileSettings = () => {
     }
   }
 
+  function toggleColorPicker() {
+    document.querySelector("#sketchPickerContainer").classList.toggle("hide");
+  }
+
   useEffect(() => {
-    if (loading) {}
-    if (!user) return navigate("/fumblr/account/login");
+    const backgroundDiv = document.querySelector("#editProfileContainer");
+    if (backgroundDiv) {
+      backgroundDiv.style.backgroundColor = background;
+    }
+  }, [background]);
+
+  useEffect(() => {
+    if (!user && !loading) return navigate("/fumblr/account/login");
   }, [user, navigate]);
 
   useEffect(() => {
-    if (
-      (description !== "Description" && description !== "") ||
-      newFile !== "" ||
-      (title !== "Title" && title !== "")
-    ) {
-      document.getElementById("saveBtn").disabled = false;
-    } else {
-      document.getElementById("saveBtn").disabled = true;
+    if (document.getElementById("saveBtn")) {
+      if (
+        (description !== "Description" && description !== "") ||
+        newFile !== "" ||
+        (title !== "Title" && title !== "")
+      ) {
+        document.getElementById("saveBtn").disabled = false;
+      } else {
+        document.getElementById("saveBtn").disabled = true;
+      }
     }
   }, [newFile, title, description]);
+
+  useEffect(() => {
+// TODO: load profile and set props
+  });
 
   if (loading) {
     return <div id="content">Loading . . .</div>;
@@ -94,12 +112,28 @@ const ProfileSettings = () => {
     return (
       <div id="content" style={{ display: "flex" }}>
         <div id="editProfileContainer">
+          <div id="sketchPickerContainer" className="hide">
+            <SketchPicker
+              color={background}
+              onChange={handleChange}
+              onChangeComplete={handleChangeComplete}
+            />
+            <button
+              onClick={() => {
+                saveBackgroundColor(background);
+                toggleColorPicker();
+              }}
+            >
+              Save
+            </button>
+          </div>
           <div className="btnContainer">
             <button id="editBtn" onClick={toggleEdit}>
               Edit Appearance
             </button>
           </div>
           <div className="btnContainer">
+            <button onClick={toggleColorPicker}>Change Background</button>
             <button id="saveBtn" className="hide" onClick={saveEdit}>
               Save
             </button>
@@ -150,7 +184,7 @@ const ProfileSettings = () => {
             <input
               placeholder="Title"
               onChange={(e) => {
-                 setTitle(e.target.value);
+                setTitle(e.target.value);
               }}
               className="editProfile"
               id="titleInput"
