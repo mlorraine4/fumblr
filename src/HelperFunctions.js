@@ -30,41 +30,40 @@ import {
 import like from "./images/like.png";
 import liked from "./images/liked.png";
 import uniqid from "uniqid";
-import { useDebugValue } from "react";
 
 /* ---------FIREBASE FUNCTIONS-------- */
 
 // Log in form submit.
 export function submitLogIn(e) {
-   e.preventDefault();
-   let email = e.target["email"].value;
-   let password = e.target["password"].value;
-   signInUserWithEmail(email, password);
- }
+  e.preventDefault();
+  let email = e.target["email"].value;
+  let password = e.target["password"].value;
+  signInUserWithEmail(email, password);
+}
 
- // Sign in user with email and password.
+// Sign in user with email and password.
 export function signInUserWithEmail(email, password) {
   const auth = getAuth();
-   signInWithEmailAndPassword(auth, email, password)
-     .then((userCredential) => {
-       // Signed in
-       const user = userCredential.user;
-       // ...
-     })
-     .catch((error) => {
-       const errorCode = error.code;
-       const errorMessage = error.message;
-       console.log(errorMessage);
-       if (errorCode === "auth/user-not-found") {
-         document.getElementById("logInError").innerHTML =
-           "Account is not found. Sign up below!";
-       }
-       if (errorCode === "auth/wrong-password") {
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in
+      const user = userCredential.user;
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      if (errorCode === "auth/user-not-found") {
+        document.getElementById("logInError").innerHTML =
+          "Account is not found. Sign up below!";
+      }
+      if (errorCode === "auth/wrong-password") {
         document.getElementById("logInError").innerHTML =
           "Email/password is incorrect.";
-       }
-     });
- }
+      }
+    });
+}
 
 // Sign up handler for adding a new user.
 export async function handleSignUp(email, password, displayName) {
@@ -350,19 +349,10 @@ export function saveProfilePicture(photoURL) {
 //     });
 // }
 
-// TODO: re-write using user's ref id from allusernames database-- might have to save that userid in app js
-// TODO: also re-write allusernames?
 // Save user following another to database.
 export async function saveFollow(newUser) {
   const auth = getAuth();
   const user = auth.currentUser;
-
-  const newFollowerKey = push(
-    child(dbRef(db), "/user-info/" + newUser + "/followers/")
-  ).key;
-  const newFollowingKey = push(
-    child(dbRef(db), "/user-info/" + user.displayName + "/following/")
-  ).key;
 
   const follower = {
     user: user.displayName,
@@ -373,9 +363,22 @@ export async function saveFollow(newUser) {
   };
 
   const updates = {};
-  updates["/user-info/" + user.displayName + "/following/" + newFollowingKey] =
+  updates["/user-info/" + user.displayName + "/following/" + newUser] =
     following;
-  updates["/user-info/" + newUser + "/followers/" + newFollowerKey] = follower;
+  updates["/user-info/" + newUser + "/followers/" + user.displayName] =
+    follower;
+
+  return update(dbRef(db), updates);
+}
+
+// Remove follower from database.
+export async function removeFollow(newUser) {
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  const updates = {};
+  updates["/user-info/" + user.displayName + "/following/" + newUser] = null;
+  updates["/user-info/" + newUser + "/followers/" + user.displayName] = null;
 
   return update(dbRef(db), updates);
 }
@@ -425,7 +428,8 @@ async function removeLike(post) {
 
   const updates = {};
   updates["posts/" + post.id + "/favorites/" + uid] = null;
-  updates["user-posts/" + post.author + "/" + post.id + "/favorites/" + uid] = null;
+  updates["user-posts/" + post.author + "/" + post.id + "/favorites/" + uid] =
+    null;
   updates["/user-info/" + user.displayName + "/liked-posts/" + post.id] = null;
   updates["posts/" + post.id + "/starCount"] = increment(-1);
   updates["user-posts/" + post.author + "/" + post.id + "/starCount"] =
@@ -547,10 +551,10 @@ export async function updateDBWithNewPhoto(url, posts) {
 }
 
 export function saveBackgroundColor(color) {
-    const user = getAuth().currentUser;
-    const updates = {};
-    updates["/user-profiles/" + user.displayName + "/backgroundColor"] = color;
-    return update(dbRef(db), updates);
+  const user = getAuth().currentUser;
+  const updates = {};
+  updates["/user-profiles/" + user.displayName + "/backgroundColor"] = color;
+  return update(dbRef(db), updates);
 }
 
 export async function saveNewChat(recipient) {
@@ -617,26 +621,6 @@ export async function getUserNames() {
   return get(child(dbRef(db), "/allUserNames"));
 }
 
-//  TODO: replace get photoURL function for this one!
-//  Get profile picture url, blog title, and blog description for a user.
-export async function getUserProfileFromDB(userDisplayName) {
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-profiles/" + userDisplayName));
-}
-
-// TODO: delete dup function
-// Get url of user's profile picture.
-export async function getProfilePic(user) {
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-profiles/" + user + "/photoURL"));
-}
-
-// Get profile photo url from database.
-export async function getUserProfilePic(userDisplayName) {
-  const ref = dbRef(getDatabase());
-  return get(child(ref, "user-profiles/" + userDisplayName + "/photoURL"));
-}
-
 // Retrieve all posts from firebase database.
 export async function getPosts() {
   const ref = dbRef(getDatabase());
@@ -651,16 +635,36 @@ export async function getUserNotifications() {
 }
 
 // Retreive users that current user is following in database.
-export async function getFollowers() {
+export async function getFollowing() {
   const user = getAuth().currentUser;
   const ref = dbRef(getDatabase());
   return get(child(ref, "user-info/" + user.displayName + "/following"));
 }
 
+// Retreive users that current user is following in database.
+export async function getFollowers() {
+  const user = getAuth().currentUser;
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-info/" + user.displayName + "/followers"));
+}
+
 // Get all user profiles from database.
-export async function getBlogs() {
+export async function getBlogProfiles() {
   const ref = dbRef(getDatabase());
   return get(child(ref, "user-profiles"));
+}
+
+//  TODO: replace get photoURL function for this one!
+//  Get profile picture url, blog title, and blog description for a user.
+export async function getUserBlogProfile(userDisplayName) {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-profiles/" + userDisplayName));
+}
+
+// Get profile photo url from database.
+export async function getUserProfilePic(userDisplayName) {
+  const ref = dbRef(getDatabase());
+  return get(child(ref, "user-profiles/" + userDisplayName + "/photoURL"));
 }
 
 // Retrieves all posts from firebase database.
@@ -703,27 +707,16 @@ export async function getChatMessages(id) {
   return get(child(ref, "chat-messages/" + id));
 }
 
-/* ---------HELPER FUNCTIONS-------- */
-
-// Sign up form.
-export function submitSignUpForm(e) {
-  e.preventDefault();
-  let email = e.target["email"].value;
-  let password = e.target["password"].value;
-  let displayName = e.target["username"].value;
-
-  handleSignUp(email, password, displayName);
-}
-
-// Iterates through all saved usernames to determine if a name is already taken.
-export function isUserFound(userNames, newName) {
-  let userInfo = Object.values(userNames);
-  userInfo.forEach((el) => {
-    if (newName === el.user) {
-      return true;
-    }
-  });
-  return false;
+export async function toggleFollow(e, newUser) {
+  if (e.target.innerHTML === "Following") {
+    // unfollow user
+    removeFollow(newUser);
+    e.target.innerHTML = "Follow";
+  } else {
+    // follow user
+    saveFollow(newUser);
+    e.target.innerHTML = "Following";
+  }
 }
 
 // Save user like or unlike of a post.
@@ -746,6 +739,29 @@ export async function toggleLikedStatus(e, post) {
       removeNotification("like", user, post.author, post.id);
     });
   }
+}
+
+/* ---------HELPER FUNCTIONS-------- */
+
+// Sign up form.
+export function submitSignUpForm(e) {
+  e.preventDefault();
+  let email = e.target["email"].value;
+  let password = e.target["password"].value;
+  let displayName = e.target["username"].value;
+
+  handleSignUp(email, password, displayName);
+}
+
+// Iterates through all saved usernames to determine if a name is already taken.
+export function isUserFound(userNames, newName) {
+  let userInfo = Object.values(userNames);
+  userInfo.forEach((el) => {
+    if (newName === el.user) {
+      return true;
+    }
+  });
+  return false;
 }
 
 // Save all posts, order them by most recent, and save if user has already liked each post.
@@ -794,10 +810,7 @@ export function pickRandomBlogs(blogsObj) {
   if (blogValues.length > 4) {
   } else {
     blogValues.forEach((value) => {
-      blogs.push({
-        ...value,
-        id: uniqid(),
-      });
+      blogs.push(value);
     });
     return blogs;
   }

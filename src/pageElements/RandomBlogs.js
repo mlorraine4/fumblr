@@ -1,46 +1,49 @@
+import { Link } from "react-router-dom";
 import { saveFollow } from "../HelperFunctions";
 
 const RandomBlogs = ({ blogs, isFollowing }) => {
+  // TODO: rewrite to display 2 different maps, one for user following and other for not following (look at posts)
   return (
     <div id="randomBlogsContent">
       {blogs.map((blog) => {
         return (
-          <div
-            style={{ display: "flex", justifyContent: "space-between" }}
-            className="blogContainer"
-            key={blog.id}
-          >
+          <Link to={`/fumblr/blog/${blog.user}`} key={blog.user}>
             <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              style={{ display: "flex", justifyContent: "space-between" }}
+              className="blogContainer"
             >
-              <img src={blog.photoURL} className="randomBlogPic cover"></img>
-              <div>
-                <div className="blogUserName">{blog.user}</div>
-                <div className="blogTitle">{blog.title}</div>
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <button
-                className={isFollowing(blog.user)}
-                onClick={() => {
-                  saveFollow(blog.user);
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                Follow
-              </button>
-              <div className="close">x</div>
+                <img src={blog.photoURL} className="randomBlogPic cover"></img>
+                <div>
+                  <div className="blogUserName">{blog.user}</div>
+                  <div className="blogTitle">{blog.title}</div>
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <button
+                  className={isFollowing(blog.user)}
+                  onClick={() => {
+                    saveFollow(blog.user);
+                  }}
+                >
+                  Follow
+                </button>
+                <div className="close">x</div>
+              </div>
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>

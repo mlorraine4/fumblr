@@ -16,23 +16,16 @@ import {
   get,
   onValue,
 } from "firebase/database";
-import uniqid from "uniqid";
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
 import like from "../images/like.png";
 import liked from "../images/liked.png";
 import { useState, useEffect } from "react";
-import UserPosts from "./UserPosts";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { MainPostClassNames } from "../HelperFunctions";
 import Posts from "../pageElements/Posts";
 import { Link } from "react-router-dom";
 
-const HomePage = ({ isFollowing }) => {
+const HomePage = ({ isFollowing, following }) => {
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
   const [allPosts, setAllPosts] = useState([]);
@@ -104,20 +97,13 @@ const HomePage = ({ isFollowing }) => {
       });
   }
 
-  function getUserProfilePic() {
-    const user = getAuth().currentUser;
-    const profileRef = dbRef(db, "profile-pictures/" + user.displayName);
-    onValue(profileRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log(data);
-      document.querySelector("#" + user.displayName).src = data.photoURL;
-    });
-  }
+  useEffect(() => {
+  }, [following]);
 
   useEffect(() => {
+
     if (user) {
-      // Listen for new posts in database.
-      // TODO: might not want to randomly update when user is scrolling
+      // Get all posts in database.
       const postsRef = query(
         dbRef(db, "posts/"),
         orderByChild("descendingOrder")
@@ -149,6 +135,8 @@ const HomePage = ({ isFollowing }) => {
         } else {
           setAllPosts([]);
         }
+      }, {
+        onlyOnce: true,
       });
     }
   }, [user, loading]);
@@ -169,7 +157,7 @@ const HomePage = ({ isFollowing }) => {
                 <Posts
                   posts={allPosts}
                   classNames={MainPostClassNames}
-                  isFollowing={isFollowing}
+                  following={following}
                 />
               </div>
             </div>

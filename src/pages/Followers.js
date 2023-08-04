@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Followers = ({ followers }) => {
@@ -14,19 +14,23 @@ const Followers = ({ followers }) => {
 
   if (user) {
     return (
-      <div id="followers">
-        <div>Your Followers:</div>
-        {followers.map((follower, index) => {
-          return (
-            <div key={index} style={{ display: "flex" }}>
-              <img
-                src={follower.photoURL}
-                className="followerProfile cover"
-              ></img>
-              <div>{follower.user}</div>
-            </div>
-          );
-        })}
+      <div id="content">
+        <div id="followersPage">
+          <div id="followersPageTitle">Your Followers</div>
+          {followers.map((follower, index) => {
+            return (
+              <Link to={`/fumblr/blog/${follower.user}`}>
+                <div key={index} className="followersPageProfile">
+                  <img
+                    src={follower.photoURL}
+                    className="followerProfile cover"
+                  ></img>
+                  <div>{follower.user}</div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     );
   } else {

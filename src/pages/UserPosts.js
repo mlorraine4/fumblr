@@ -58,19 +58,15 @@ const UserPosts = ({ isFollowing }) => {
   } else {
     return (
       <>
-        <div
-          id="content"
-          style={{
-            width: "min-content",
-            marginLeft: "calc((100vw - 500px)/2 - 225px)",
-          }}
-        >
-          <div id="userPostTitle">Your Blog Posts</div>
-          <Posts
-            posts={userPosts}
-            isFollowing={isFollowing}
-            classNames={MainPostClassNames}
-          />
+        <div id="content">
+          <div id="userPostsPage">
+            <div id="userPostTitle">Your Blog Posts</div>
+            <Posts
+              posts={userPosts}
+              isFollowing={isFollowing}
+              classNames={MainPostClassNames}
+            />
+          </div>
         </div>
         <div>FOOTER</div>
       </>

@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import Posts from "./Posts";
 import {
   RadarClassNames,
-  getBlogs,
+  getBlogProfiles,
   pickRandomBlogs,
   pickRandomPost,
 } from "../HelperFunctions";
 import RandomBlogs from "./RandomBlogs";
+import PostsWithoutProfile from "./PostsWithoutProfile";
 
 const NewBlogsToFollow = ({ posts, isFollowing }) => {
   const [randomBlogs, setRandomBlogs] = useState([]);
   const [randomPost, setRandomPost] = useState([]);
 
   useEffect(() => {
-    getBlogs().then((snapshot) => {
+    getBlogProfiles().then((snapshot) => {
       if (snapshot.exists()) {
         setRandomBlogs(pickRandomBlogs(snapshot.val()));
       }
@@ -26,8 +26,7 @@ const NewBlogsToFollow = ({ posts, isFollowing }) => {
     }
   }, [posts]);
 
-  useEffect(() => {
-  }, [randomPost]);
+  useEffect(() => {}, [randomPost]);
 
   return (
     <>
@@ -47,7 +46,7 @@ const NewBlogsToFollow = ({ posts, isFollowing }) => {
             Refresh
           </button>
         </div>
-        <Posts
+        <PostsWithoutProfile
           posts={randomPost}
           classNames={RadarClassNames}
           isFollowing={isFollowing}

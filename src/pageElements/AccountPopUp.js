@@ -36,7 +36,7 @@ const AccountPopUp = ({ user }) => {
         </div>
       </Link>
       <Link to={`/fumblr/blog/${user.displayName}`}>
-        <div>{user.displayName}'s Blog</div>
+        <div onClick={toggleAccountDisplay}>{user.displayName}'s Blog</div>
       </Link>
       <Link to={"/fumblr/account/posts"}>
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>

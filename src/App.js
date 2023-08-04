@@ -2,11 +2,16 @@ import "./styles/App.css";
 import React, { useEffect, useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getFirebaseConfig, db } from "./firebase-config";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
-  getAuth,
-  onAuthStateChanged,
-} from "firebase/auth";
-import { child, ref as dbRef, getDatabase, get, onValue, query, orderByChild } from "firebase/database";
+  child,
+  ref as dbRef,
+  getDatabase,
+  get,
+  onValue,
+  query,
+  orderByChild,
+} from "firebase/database";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import AccountSettings from "./pages/AccountSettings";
 import Inbox from "./pages/Inbox";
@@ -18,7 +23,13 @@ import Header from "./pageElements/Header";
 import ProfileSettings from "./pages/ProfileSettings";
 import Followers from "./pages/Followers";
 import SavedPosts from "./pages/SavedPosts";
-import { getFollowers, getProfilePic, getUserNotifications } from "./HelperFunctions";
+import {
+  getFollowers,
+  getUserProfilePic,
+  getUserNotifications,
+  getFollowing,
+  removeFollow,
+} from "./HelperFunctions";
 import Blog from "./pages/Blog";
 import Post from "./pages/Post";
 
@@ -38,11 +49,11 @@ function App() {
   const auth = getAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [newNotifications, setNewNotifications] = useState([]);
   const [theme, setTheme] = useState("default");
 
-  // TODO: LEAVE ALL FUNCTIONS IN APP.
   // Observer for user sign in status.
   function initalizeFirebaseAuth() {
     onAuthStateChanged(auth, (user) => {
@@ -56,31 +67,28 @@ function App() {
     });
   }
 
-  // Get each follower's profile picture and add to followers array.
-  async function iterateFollowers(followersObj) {
-    let followersArray = [];
-    let followers = Object.values(followersObj);
-    followers.forEach((el) => {
-      getProfilePic(el.user).then((snapshot) => {
-        if (snapshot.exists()) {
-          followersArray.push({
-            user: el.user,
-            photoURL: snapshot.val(),
-          });
-        }
-        if (followersArray.length === followers.length) {
-          setFollowers(followersArray);
-        }
-      });
-    });
-  }
-
   // Determine if user is following another user.
   function isFollowing(author) {
-    if (followers.some((el) => el.user === author)) {
+    if (following.some((el) => el.user === author)) {
       return "followBtn hide";
     } else {
       return "followBtn";
+    }
+  }
+
+  function isFollowingBlogPage(button, user) {
+    if (button === "follow") {
+      if (following.some((el) => el.user === user)) {
+        return "hide";
+      } else {
+        return;
+      }
+    } else {
+      if (following.some((el) => el.user === user)) {
+        return;
+      } else {
+        return "hide";
+      }
     }
   }
 
@@ -97,7 +105,8 @@ function App() {
       document.querySelector("#notificationIcon").style.opacity = 0;
     } else {
       document.querySelector("#notificationIcon").style.opacity = 1;
-      document.querySelector("#notificationIcon").innerHTML = newNotificationArray.length;
+      document.querySelector("#notificationIcon").innerHTML =
+        newNotificationArray.length;
     }
   }
 
@@ -107,44 +116,74 @@ function App() {
 
   useEffect(() => {
     if (currentUser) {
-      console.log("app user logged in");
-      getFollowers(currentUser).then((snapshot) => {
+      // User following listener.
+      const followingRef = query(
+        dbRef(db, "user-info/" + currentUser.displayName + "/following")
+      );
+      onValue(followingRef, (snapshot) => {
+        let followingArray = [];
         if (snapshot.exists()) {
-          iterateFollowers(snapshot.val());
+          snapshot.forEach((child) => {
+            getUserProfilePic(child.val().user).then((urlSnapshot) => {
+              if (snapshot.exists()) {
+                followingArray.push({
+                  user: child.val().user,
+                  photoURL: urlSnapshot.val(),
+                });
+              }
+              console.log(followingArray);
+              setFollowing(followingArray);
+            });
+          });
         }
       });
 
-      // Listen for new notifications in database.
-      function notificationListener() {
-        const notificationsRef = query(
-          dbRef(db, "notifications/" + currentUser.displayName),
-          orderByChild("descendingOrder")
-        );
-        onValue(notificationsRef, (snapshot) => {
-          if (snapshot.exists()) {
-            let notifications = [];
-            let newNotifications = [];
-            snapshot.forEach((child) => {
-              if (!child.val().seen) {
-                newNotifications.push(child.val())
+      // User followers listener.
+      const followersRef = query(
+        dbRef(db, "user-info/" + currentUser.displayName + "/followers")
+      );
+      onValue(followersRef, (snapshot) => {
+        let followersArray = [];
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            getUserProfilePic(child.val().user).then((urlSnapshot) => {
+              if (snapshot.exists()) {
+                followersArray.push({
+                  user: child.val().user,
+                  photoURL: urlSnapshot.val(),
+                });
               }
-              notifications.push(child.val());
-              if (
-                Object.values(snapshot.val()).length === notifications.length
-              ) {
-                setNotifications(notifications);
-                setNewNotifications(newNotifications);
-                updateNotificationIcon(newNotifications);
-              }
+              setFollowers(followersArray);
             });
-          } else {
-            setNotifications([]);
-            updateNotificationIcon([]);
-          }
-        });
-      }
+          });
+        }
+      });
 
-      notificationListener();
+      // Notifications listener.
+      const notificationsRef = query(
+        dbRef(db, "notifications/" + currentUser.displayName),
+        orderByChild("descendingOrder")
+      );
+      onValue(notificationsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          let notifications = [];
+          let newNotifications = [];
+          snapshot.forEach((child) => {
+            if (!child.val().seen) {
+              newNotifications.push(child.val());
+            }
+            notifications.push(child.val());
+            if (Object.values(snapshot.val()).length === notifications.length) {
+              setNotifications(notifications);
+              setNewNotifications(newNotifications);
+              updateNotificationIcon(newNotifications);
+            }
+          });
+        } else {
+          setNotifications([]);
+          updateNotificationIcon([]);
+        }
+      });
     }
   }, [currentUser]);
 
@@ -160,7 +199,7 @@ function App() {
           <Route
             path={"/"}
             element={
-              <HomePage followers={followers} isFollowing={isFollowing} />
+              <HomePage isFollowing={isFollowing} following={following} />
             }
           ></Route>
           <Route
@@ -194,11 +233,13 @@ function App() {
           ></Route>
           <Route
             path="fumblr/blog/:user"
-            element={<Blog isFollowing={isFollowing} />}
+            element={
+              <Blog following={following} isFollowing={isFollowingBlogPage} />
+            }
           ></Route>
           <Route
             path="fumblr/post/:id"
-            element={<Post isFollowing={isFollowing} user={currentUser}/>}
+            element={<Post isFollowing={isFollowing} user={currentUser} />}
           ></Route>
         </Routes>
       </HashRouter>

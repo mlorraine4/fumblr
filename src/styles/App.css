@@ -186,12 +186,13 @@ input::placeholder {
   background-color: var(--secondary-background);
   color: var(--text-primary);
   position: absolute;
+  border-radius: 4px;
   z-index: 2;
 }
 
 #accountPopUp {
   width: 150px;
-  top: 51px;
+  top: 45px;
   left: -55px;
 }
 
@@ -272,7 +273,7 @@ input::placeholder {
 }
 
 /* HOME PAGE */
-#content, #followers {
+#content {
   padding-top: 80px;
 }
 
@@ -436,7 +437,7 @@ input::placeholder {
   padding: 10px;
 }
 
-.postIcons:hover, .liked:hover, .like:hover, #logo:hover, .navBarIcons:hover, #headerNewPostIcon:hover, #logOutDiv:hover {
+.postIcons:hover, .liked:hover, .like:hover, #logo:hover, .navBarIcons:hover, #headerNewPostIcon:hover, #logOutDiv:hover, .followersPageProfile:hover, .postAuthor:hover {
   cursor: pointer;
 }
 
@@ -461,16 +462,32 @@ input::placeholder {
 
 /* FOLLOWERS PAGE */
 
-#followers {
+#followersPage {
   width: 200px;
   margin-left: auto;
   margin-right: auto;
 }
 
+.followersPageProfile {
+  margin: 10px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+}
+
+#followersPageTitle {
+  font-weight: bold;
+  font-size: 1.5em;
+  padding: 10px;
+}
+
 .followerProfile {
-  height: 85px;
-  width: 85px;
+  height: 50px;
+  width: 50px;
   border-radius: 12px;
+  margin-right: 20px;
 }
 
 /* PROFILE SETTINGS PAGE */
@@ -582,9 +599,10 @@ input::placeholder {
 
 .accountPopUpItem {
   color: var(--text-primary);
+  padding: 5px;
 }
 
-.navBarComponent:hover, .accountPopUpItem:hover {
+.navBarComponent:hover, .accountPopUpItem:hover, .followersPageProfile:hover {
   background-color: var(--subtle);
 }
 
@@ -612,6 +630,7 @@ input::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 #randomBlogsContent {
@@ -619,10 +638,15 @@ input::placeholder {
 }
 
 .blogContainer {
-  padding: 10px 0 10px 0;
+  padding: 10px;
   color: var(--text-primary);
   width: 90%;
   margin: auto;
+  border-radius: 8px;
+}
+
+.blogContainer:hover {
+  background-color: var(--secondary-background);
 }
 
 .randomBlogPic {
@@ -657,9 +681,9 @@ input::placeholder {
 .radarPost {
   width: 80%;
   padding: 0 10px 10px 10px;
-  margin-top: 15px;
   border-radius: 12px;
   background-color: var(--secondary-background);
+  margin: 20px auto auto auto;
 }
 
 .radarProfile {
@@ -688,7 +712,12 @@ input::placeholder {
 
 #userPostTitle {
   font-size: 1.5em;
-  text-align: left;
+  font-weight: bold;
+}
+
+#userPostsPage {
+  width: min-content;
+  margin: auto;
 }
 
 /* INBOX PAGE */
@@ -884,9 +913,27 @@ input::placeholder {
 
 /* BLOG PAGE */
 
-#blogBackgroundPic {
+#userProfileContainer {
+  width: min-content;
+  padding: 20px 50px 20px 50px;
+  margin: auto;
+  border-radius: 8px;
+}
+
+#blogProfilePic {
   height: 100px;
   width: 100px;
+  margin: auto;
   border-radius: 64px;
+}
+
+#blogUserName {
+  font-size: 2em;
+  font-weight: bold;
+  padding: 10px;
+}
+
+#blogDescription {
+  margin-bottom: 20px;
 }
 
