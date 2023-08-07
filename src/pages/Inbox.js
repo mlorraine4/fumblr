@@ -21,6 +21,7 @@ import {
 } from "../HelperFunctions";
 import edit from "../images/edit.png";
 import NewChatForm from "../pageElements/NewChatForm";
+import Footer from "../pageElements/Footer";
 
 const Inbox = () => {
   const navigate = useNavigate();
@@ -57,17 +58,6 @@ const Inbox = () => {
     } else {
       saveNewChat(user);
     }
-  }
-
-  // TODO: this fnc doesn't work since when called with a state change
-  function changeActiveChat(currentDiv) {
-    console.log("displaying active");
-    let divs = document.querySelectorAll(".chatListElement");
-    divs.forEach((div) => {
-      div.classList.remove("active");
-    });
-    currentDiv.classList.add("active");
-    console.log(currentDiv);
   }
 
   useEffect(() => {
@@ -169,26 +159,16 @@ const Inbox = () => {
                   ></img>
                 </div>
               </div>
-              <div style={{ margin: "10px 0 10px", fontWeight: "bold", fontSize: "1.2em" }}>Messages</div>
+              <div
+                style={{
+                  margin: "10px 0 10px",
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                }}
+              >
+                Messages
+              </div>
               <div id="chatList"></div>
-              {/* {chats.map((el, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="chatListElement"
-                    data-key={el.id}
-                    onClick={(e) => {
-                      removePreviousChat();
-                      setIsSelected(true);
-                      setSelectedUser(e.target.innerHTML);
-                      changeActiveChat(e.target);
-                      setChatID(e.target.getAttribute("data-key"));
-                    }}
-                  >
-                    {el.user}
-                  </div>
-                );
-              })} */}
             </div>
             <Messages
               selectedUser={selectedUser}
@@ -196,7 +176,7 @@ const Inbox = () => {
               chatID={chatID}
             />
           </div>
-          <div>[footer]</div>
+          <Footer />
         </div>
       </>
     );

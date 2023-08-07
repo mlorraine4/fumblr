@@ -1,45 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { markNotificationAsSeen, removeNotification, toggleNotificationsDisplay } from "../HelperFunctions";
+import { getNotificationClassName, hideDeleteNotificationBtn, markNotificationAsSeen, removeNotification, removeNotificationDot, showDeleteNotificationBtn, toggleNotificationsDisplay } from "../HelperFunctions";
 import dot from "../images/dot.png";
 
 const NotificationsPopUp = ({ user, notifications }) => {
   const navigate = useNavigate();
 
-  function removeNotificationDot(e) {
-    if (e.target.querySelector(".notificationDot")) {
-      e.target.querySelector(".notificationDot").classList.add("noOpacity");
-    }
-  }
-
-  function showDeleteNotificationBtn(e) {
-    if (e.target.querySelector(".deleteNotification")) {
-      e.target
-        .querySelector(".deleteNotification")
-        .classList.add("fullOpacity");
-      e.target
-        .querySelector(".deleteNotification")
-        .classList.remove("noOpacity");
-    }
-  }
-
-  function hideDeleteNotificationBtn(e) {
-    if (e.target.querySelector(".deleteNotification")) {
-      e.target
-        .querySelector(".deleteNotification")
-        .classList.remove("fullOpacity");
-      e.target.querySelector(".deleteNotification").classList.add("noOpacity");
-    }
-  }
-
-  function getNotificationClassName(seen) {
-    if (seen) {
-      return "notificationDot noOpacity";
-    } else {
-      return "notificationDot fullOpacity";
-    }
-  }
-
-  function showNotification(notification) {
+  function navigateToNotification(notification) {
     if (notification.type === "like") {
       return navigate(`/fumblr/post/${notification.id}`);
     } if (notification.type === "message") {
@@ -64,7 +30,7 @@ const NotificationsPopUp = ({ user, notifications }) => {
                 alignItems: "center",
               }}
               key={notification.id}
-              onClick={() => {showNotification(notification)
+              onClick={() => {navigateToNotification(notification)
               toggleNotificationsDisplay()}}
               onMouseEnter={(e) => {
                 removeNotificationDot(e);

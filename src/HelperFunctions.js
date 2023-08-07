@@ -1021,6 +1021,36 @@ export function toggleChatForm() {
   document.getElementById("header").classList.toggle("fade");
 }
 
+export function removeNotificationDot(e) {
+  if (e.target.querySelector(".notificationDot")) {
+    e.target.querySelector(".notificationDot").classList.add("noOpacity");
+  }
+}
+
+export function showDeleteNotificationBtn(e) {
+  if (e.target.querySelector(".deleteNotification")) {
+    e.target.querySelector(".deleteNotification").classList.add("fullOpacity");
+    e.target.querySelector(".deleteNotification").classList.remove("noOpacity");
+  }
+}
+
+export function hideDeleteNotificationBtn(e) {
+  if (e.target.querySelector(".deleteNotification")) {
+    e.target
+      .querySelector(".deleteNotification")
+      .classList.remove("fullOpacity");
+    e.target.querySelector(".deleteNotification").classList.add("noOpacity");
+  }
+}
+
+export function getNotificationClassName(seen) {
+  if (seen) {
+    return "notificationDot noOpacity";
+  } else {
+    return "notificationDot fullOpacity";
+  }
+}
+
 // Displays a Message in the UI.
 function displayMessage(snapshot, id) {
   let div = document.getElementById(id) || createAndInsertMsgDiv(id);

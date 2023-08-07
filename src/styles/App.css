@@ -45,6 +45,7 @@ input[type="radio"]:checked+label {
 
 a {
   text-decoration: none;
+  color: var(--text-primary);
 }
 
 a:hover, a:focus, a:active, a:visited {
@@ -93,11 +94,17 @@ input::placeholder {
   color: var(--faded);
 }
 
+input:focus:invalid {
+  border: 1px solid red;
+}
+
 #content {
   background-color: var(--background);
   position: relative;
   min-width: min-content;
   width: 100vw;
+  padding-top: 80px;
+  padding-bottom: 40px;
 }
 
 .fade {
@@ -273,9 +280,6 @@ input::placeholder {
 }
 
 /* HOME PAGE */
-#content {
-  padding-top: 80px;
-}
 
 #homePosts {
   margin-top: 20px;
@@ -437,7 +441,7 @@ input::placeholder {
   padding: 10px;
 }
 
-.postIcons:hover, .liked:hover, .like:hover, #logo:hover, .navBarIcons:hover, #headerNewPostIcon:hover, #logOutDiv:hover, .followersPageProfile:hover, .postAuthor:hover {
+.postIcons:hover, .liked:hover, .like:hover, #logo:hover, .navBarIcons:hover, #headerNewPostIcon:hover, #logOutDiv:hover, .followersPageProfile:hover, .postAuthor:hover, .newPostBtn:hover {
   cursor: pointer;
 }
 
@@ -455,7 +459,7 @@ input::placeholder {
   color: var(--accent);
 }
 
-#postPage {
+#postPage, #savedPostPage {
   width: min-content;
   margin: auto;
 }
@@ -935,5 +939,17 @@ input::placeholder {
 
 #blogDescription {
   margin-bottom: 20px;
+}
+
+
+#footer {
+  display: flex;
+  justify-content: space-between;
+  width: 250px;
+  margin: auto;
+  color: var(--accent);
+  position: absolute;
+  right: 20px;
+  bottom: 0;
 }
 

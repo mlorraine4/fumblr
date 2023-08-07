@@ -29,21 +29,12 @@ import {
   getUserNotifications,
   getFollowing,
   removeFollow,
+  getPost,
 } from "./HelperFunctions";
 import Blog from "./pages/Blog";
 import Post from "./pages/Post";
-
-/*                                              -----TO DO LIST-----
-  1. notification functionality (user has new follower, user's post has a new like, user recieves new message)
-    --this will be under the heart icon in the header
-  2. messaging functionality
-  3. reblog functionality
-  4. set up pathway and design  for user's profiles 
-    --how to set up links for all users?
-    --add unfollow fnc on other's profiles, add edit own profile fnc
-  5. page that shows user's liked posts
-  6. comment on post fnc
-*/
+import liked from "./images/liked.png";
+// TODO: follow, like function needs to check if a user is signed in. if not, show sign in pop up
 
 function App() {
   const auth = getAuth();
@@ -51,6 +42,7 @@ function App() {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [savedPosts, setSavedPosts] = useState([]);
   const [newNotifications, setNewNotifications] = useState([]);
   const [theme, setTheme] = useState("default");
 
@@ -76,19 +68,11 @@ function App() {
     }
   }
 
-  function isFollowingBlogPage(button, user) {
-    if (button === "follow") {
-      if (following.some((el) => el.user === user)) {
-        return "hide";
-      } else {
-        return;
-      }
+  function isFollowingBlogPage(user) {
+    if (following.some((el) => el.user === user)) {
+      return true;
     } else {
-      if (following.some((el) => el.user === user)) {
-        return;
-      } else {
-        return "hide";
-      }
+      return false;
     }
   }
 
@@ -184,6 +168,30 @@ function App() {
           updateNotificationIcon([]);
         }
       });
+
+      // Saved posts listener.
+        const likedPostsRef = query(
+          dbRef(db, "user-info/" + currentUser.displayName + "/liked-posts"),
+          orderByChild("descendingOrder")
+        );
+        onValue(likedPostsRef, (snapshot) => {
+          let postsArray = [];
+          if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+              getPost(child.val().id).then((postSnapshot) => {
+                if (postSnapshot.exists()) {
+                  postsArray.push({
+                    ...postSnapshot.val(),
+                    id: child.val().id,
+                    src: liked,
+                    className: "liked",
+                  });
+                }
+              });
+            });
+            setSavedPosts(postsArray);
+          }
+        });
     }
   }, [currentUser]);
 
@@ -221,7 +229,7 @@ function App() {
           <Route path={"/fumblr/inbox"} element={<Inbox />}></Route>
           <Route
             path={"/fumblr/account/posts"}
-            element={<UserPosts isFollowing={isFollowing} />}
+            element={<UserPosts isFollowing={isFollowing} following={following} />}
           ></Route>
           <Route
             path={"/fumblr/account/followers"}
@@ -229,7 +237,7 @@ function App() {
           ></Route>
           <Route
             path={"/fumblr/account/liked-posts"}
-            element={<SavedPosts isFollowing={isFollowing} />}
+            element={<SavedPosts isFollowing={isFollowing} following={following} posts={savedPosts} />}
           ></Route>
           <Route
             path="fumblr/blog/:user"

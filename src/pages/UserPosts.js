@@ -8,8 +8,9 @@ import { query, ref as dbRef, orderByChild, onValue } from "firebase/database";
 import { db } from "../firebase-config";
 import like from "../images/like.png";
 import liked from "../images/liked.png";
+import Footer from "../pageElements/Footer";
 
-const UserPosts = ({ isFollowing }) => {
+const UserPosts = ({ isFollowing, following }) => {
   const auth = getAuth();
   const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState([]);
@@ -65,10 +66,11 @@ const UserPosts = ({ isFollowing }) => {
               posts={userPosts}
               isFollowing={isFollowing}
               classNames={MainPostClassNames}
+              following={following}
             />
           </div>
         </div>
-        <div>FOOTER</div>
+        <Footer />
       </>
     );
   }
