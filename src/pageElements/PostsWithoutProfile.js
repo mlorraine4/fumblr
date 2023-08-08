@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { toggleLikedStatus } from "../HelperFunctions";
+import { toggleLikedStatus, toggleLogInPopUp } from "../HelperFunctions";
 import comment from "../images/chat.png";
 import repost from "../images/exchange.png";
 import share from "../images/send.png";
+import { getAuth } from "firebase/auth";
 
 const PostsWithoutProfile = ({ posts, classNames }) => {
   if (posts) {
@@ -30,7 +31,11 @@ const PostsWithoutProfile = ({ posts, classNames }) => {
                       className={post.className}
                       src={post.src}
                       onClick={(e) => {
+                        if (getAuth().currentUser) {
                         toggleLikedStatus(e, post);
+                        } else {
+                          toggleLogInPopUp();
+                        }
                       }}
                     ></img>
                     <div

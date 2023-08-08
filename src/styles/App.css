@@ -21,9 +21,9 @@
 
 [data-theme='light'] {
   --background: rgb(245, 245, 250);
-  --secondary-background: rgb(215, 214, 220);
+  --secondary-background: rgb(217, 217, 220);
   --text-primary: #000000;
-  --text-secondary: rgb(215, 214, 220);
+  --text-secondary: rgb(217, 217, 220);
   --text-light: rgb(207, 97, 251);
   --accent: rgb(207, 97, 251);
   --accent-faded: rgb(207, 97, 251, 0.5);
@@ -272,8 +272,18 @@ input:focus:invalid {
   color: black;
 }
 
+.logInBtn:hover {
+  color: var(--text-secondary);
+  background-color: black;
+}
+
 .signUpBtn {
   background-color: var(--accent);
+  color: white;
+}
+
+.signUpBtn:hover {
+  background-color: var(--accent-faded);
   color: white;
 }
 
@@ -974,3 +984,29 @@ input:focus:invalid {
   padding: 20px;
 }
 
+#logInPopUp {
+  position: absolute;
+  margin-left: auto; 
+  margin-right: auto;
+  top: 100px;
+  left: 0;
+  right: 0;
+  width: 500px;
+  z-index: 2;
+  background-color: var(--background);
+  padding: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+}
+
+#closeLogInPopUpBtn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+#logInPopUpTitle {
+  color: var(--accent);
+  padding: 10px;
+  font-weight: bold;
+}

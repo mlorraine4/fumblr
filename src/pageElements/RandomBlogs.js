@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { saveFollow } from "../HelperFunctions";
 
 const RandomBlogs = ({ blogs, isFollowing }) => {
-  // TODO: rewrite to display 2 different maps, one for user following and other for not following (look at posts)
   return (
     <div id="randomBlogsContent">
       {blogs.map((blog) => {

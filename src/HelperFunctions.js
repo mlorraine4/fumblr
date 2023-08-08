@@ -65,6 +65,33 @@ export function signInUserWithEmail(email, password) {
     });
 }
 
+export async function submitLogInPopUp(e) {
+  e.preventDefault();
+  const auth = getAuth();
+  let email = e.target["email"].value;
+  let password = e.target["password"].value;
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in
+      const user = userCredential.user;
+      // ...
+      toggleLogInPopUp();
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      if (errorCode === "auth/user-not-found") {
+        document.getElementById("logInError").innerHTML =
+          "Account is not found. Sign up below!";
+      }
+      if (errorCode === "auth/wrong-password") {
+        document.getElementById("logInError").innerHTML =
+          "Email/password is incorrect.";
+      }
+    });
+}
+
 // Sign up handler for adding a new user.
 export async function handleSignUp(email, password, displayName) {
   getUserNames().then((snapshot) => {
@@ -941,17 +968,6 @@ export function toggleWithPhotoPostForm() {
   document.getElementById("withPhotoPostForm").reset();
 }
 
-export function toggleEdit() {
-  document.querySelector("#editBtn").classList.toggle("hide");
-  document.querySelector("#saveBtn").classList.toggle("hide");
-  document.querySelector("#cancelBtn").classList.toggle("hide");
-  document.querySelector("#inputContainer").classList.toggle("hide");
-  document.querySelector("#displayDescription").classList.toggle("hide");
-  document.querySelector("#displayDescription").classList.toggle("show");
-  document.querySelector("#editDescription").classList.toggle("hide");
-  document.querySelector("#editDescription").classList.toggle("show");
-}
-
 export function displayAccountTaken() {
   document.getElementById("signUpError").innerHTML = "Account already exists.";
 }
@@ -964,6 +980,16 @@ export function displaySignUpError() {
 export function displayUserTaken() {
   document.getElementById("userNameError").innerHTML =
     "Username is already taken. Please choose another.";
+}
+
+export function toggleEdit() {
+  document.querySelector("#displayModeBtnContainer").classList.toggle("hide");
+  document.querySelector("#editModeBtnContainer").classList.toggle("hide");
+  document.querySelector("#inputContainer").classList.toggle("hide");
+  document.querySelector("#displayDescription").classList.toggle("hide");
+  document.querySelector("#displayDescription").classList.toggle("show");
+  document.querySelector("#editDescription").classList.toggle("hide");
+  document.querySelector("#editDescription").classList.toggle("show");
 }
 
 export function displayUpdate() {
@@ -1080,6 +1106,12 @@ function createAndInsertMsgDiv(id) {
   container.appendChild(div);
 
   return div;
+}
+
+export function toggleLogInPopUp() {
+  document.querySelector("#logInPopUp").classList.toggle("hide");
+  document.querySelector("#content").classList.toggle("fade");
+  document.querySelector("#content").classList.toggle("stop-scrolling");
 }
 
 /* DATA */

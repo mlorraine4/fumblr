@@ -5,6 +5,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import edit from "../images/edit.png";
 import SettingsNavBar from "../pageElements/SettingsNavBar";
 import {
+  getUserBlogProfile,
   saveBackgroundColor,
   saveDescription,
   savePhoto,
@@ -19,8 +20,13 @@ const ProfileSettings = () => {
   const [user, loading, error] = useAuthState(auth);
   const [newFile, setNewFile] = useState("");
   const [title, setTitle] = useState("Title");
+  const [newTitle, setNewTitle] = useState(null);
   const [description, setDescription] = useState("Description");
+  const [newDescription, setNewDescription] = useState(null);
   const [background, setBackground] = useState("#fff");
+  const [disabled, setDisabled] = useState(true);
+  const [titleClass, setTitleClass] = useState("editProfile");
+  const [descriptionClass, setDescriptionClass] = useState("editProfile");
 
   // Read image file selected from input and display new img for user.
   async function getImg() {
@@ -46,16 +52,26 @@ const ProfileSettings = () => {
     if (newFile !== "") {
       await savePhoto(newFile);
     }
-    if (title !== "Title" && title !== "") {
-      await saveTitle();
+    if (newTitle && newTitle !== "Title" && newTitle !== "") {
+      await saveTitle(newTitle);
+      setTitle(newTitle);
+      setNewTitle(null);
+      setTitleClass("editProfile");
     }
-    if (description !== "Description" && description !== "") {
-      await saveDescription();
+    if (
+      newDescription &&
+      newDescription !== "Description" &&
+      newDescription !== ""
+    ) {
+      await saveDescription(newDescription);
+      setDescription(newDescription);
+      setNewDescription(null);
+      setDescriptionClass("editProfile");
     }
+    toggleEdit();
   }
 
   function handleChange(color) {
-    console.log(color);
     setBackground(color.hex);
   }
 
@@ -71,6 +87,13 @@ const ProfileSettings = () => {
     if (description === "") {
       setDescription("Description");
     }
+    if (
+      !document
+        .querySelector("#sketchPickerContainer")
+        .classList.contains("hide")
+    ) {
+      toggleColorPicker();
+    }
   }
 
   function toggleColorPicker() {
@@ -78,40 +101,53 @@ const ProfileSettings = () => {
   }
 
   useEffect(() => {
-    const backgroundDiv = document.querySelector("#editProfileContainer");
-    if (backgroundDiv) {
-      backgroundDiv.style.backgroundColor = background;
+    if (user) {
+      getUserBlogProfile(user.displayName).then((snapshot) => {
+        if (snapshot.exists()) {
+          if (snapshot.val().title) {
+            setTitle(snapshot.val().title);
+          } else {
+            setTitleClass("editProfile hide");
+          }
+          if (snapshot.val().description) {
+            setDescription(snapshot.val().description);
+          } else {
+            setDescriptionClass("editProfile hide");
+          }
+          if (snapshot.val().backgroundColor) {
+            setBackground(snapshot.val().backgroundColor);
+          }
+        }
+      });
     }
-  }, [background]);
-
-  useEffect(() => {
     if (!user && !loading) return navigate("/fumblr/account/login");
   }, [user, navigate]);
 
   useEffect(() => {
-    if (document.getElementById("saveBtn")) {
-      if (
-        (description !== "Description" && description !== "") ||
-        newFile !== "" ||
-        (title !== "Title" && title !== "")
-      ) {
-        document.getElementById("saveBtn").disabled = false;
-      } else {
-        document.getElementById("saveBtn").disabled = true;
-      }
+    // TODO: rewrite
+    if (newDescription || newFile !== "" || newTitle) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
     }
-  }, [newFile, title, description]);
+  }, [newFile, newTitle, newDescription]);
 
   useEffect(() => {
-// TODO: load profile and set props
-  });
+    console.log(disabled);
+  }, [disabled]);
+
+  useEffect(() => {
+    if (newTitle) {
+      console.log(newTitle);
+    }
+  }, [newTitle]);
 
   if (loading) {
     return <div id="content">Loading . . .</div>;
   } else {
     return (
       <div id="content" style={{ display: "flex" }}>
-        <div id="editProfileContainer">
+        <div id="editProfileContainer" style={{ backgroundColor: background }}>
           <div id="sketchPickerContainer" className="hide">
             <SketchPicker
               color={background}
@@ -119,25 +155,29 @@ const ProfileSettings = () => {
               onChangeComplete={handleChangeComplete}
             />
             <button
+              className="accentBtn"
               onClick={() => {
                 saveBackgroundColor(background);
                 toggleColorPicker();
+                toggleEdit();
               }}
             >
               Save
             </button>
           </div>
-          <div className="btnContainer">
+          <div className="btnContainer" id="displayModeBtnContainer">
             <button id="editBtn" onClick={toggleEdit}>
               Edit Appearance
             </button>
           </div>
-          <div className="btnContainer">
-            <button onClick={toggleColorPicker}>Change Background</button>
-            <button id="saveBtn" className="hide" onClick={saveEdit}>
+          <div className="btnContainer hide" id="editModeBtnContainer">
+            <button onClick={toggleColorPicker} className="accentBtn">
+              Change Background
+            </button>
+            <button id="saveBtn" onClick={saveEdit} disabled={disabled}>
               Save
             </button>
-            <button id="cancelBtn" className="hide" onClick={cancelUpload}>
+            <button id="cancelBtn" onClick={cancelUpload}>
               Cancel
             </button>
           </div>
@@ -145,7 +185,7 @@ const ProfileSettings = () => {
             style={{
               position: "relative",
               width: "100px",
-              margin: "50px auto 50px auto",
+              margin: "60px auto 50px auto",
             }}
           >
             <div
@@ -173,26 +213,26 @@ const ProfileSettings = () => {
             ></img>
           </div>
           <div id="displayDescription" className="show">
-            <div id="profileTitle" className="editProfile">
+            <div id="profileTitle" className={titleClass}>
               {title}
             </div>
-            <div id="profileDescription" className="editProfile">
+            <div id="profileDescription" className={descriptionClass}>
               {description}
             </div>
           </div>
           <div id="editDescription" className="hide">
             <input
-              placeholder="Title"
+              placeholder={title}
               onChange={(e) => {
-                setTitle(e.target.value);
+                setNewTitle(e.target.value);
               }}
               className="editProfile"
               id="titleInput"
             ></input>
             <input
-              placeholder="Description"
+              placeholder={description}
               onChange={(e) => {
-                setDescription(e.target.value);
+                setNewDescription(e.target.value);
               }}
               className="editProfile"
             ></input>

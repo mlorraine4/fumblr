@@ -3,6 +3,7 @@ import {
   notifyUser,
   saveFollow,
   toggleLikedStatus,
+  toggleLogInPopUp,
 } from "../HelperFunctions";
 import ellipsis from "../images/more.png";
 import comment from "../images/chat.png";
@@ -95,16 +96,19 @@ const Posts = ({ posts, classNames, following }) => {
                       data-key={post.author}
                       className="followBtn"
                       onClick={() => {
-                        saveFollow(post.author).then(() => {
-                          notifyUser(
-                            "follow",
-                            getAuth().currentUser.displayName,
-                            post.author,
-                            ""
-                          );
-                        });
-
-                        hideFollowButton(post.author);
+                        if (getAuth().currentUser) {
+                          saveFollow(post.author).then(() => {
+                            notifyUser(
+                              "follow",
+                              getAuth().currentUser.displayName,
+                              post.author,
+                              ""
+                            );
+                            hideFollowButton(post.author);
+                          });
+                        } else {
+                          toggleLogInPopUp();
+                        }
                       }}
                     >
                       follow
@@ -123,7 +127,11 @@ const Posts = ({ posts, classNames, following }) => {
                       className={post.className}
                       src={post.src}
                       onClick={(e) => {
-                        toggleLikedStatus(e, post);
+                        if (getAuth().currentUser) {
+                          toggleLikedStatus(e, post);
+                        } else {
+                          toggleLogInPopUp();
+                        }
                       }}
                     ></img>
                     <div

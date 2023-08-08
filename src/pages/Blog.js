@@ -5,6 +5,7 @@ import {
   MainPostClassNames,
   getUserBlogProfile,
   toggleFollow,
+  toggleLogInPopUp,
 } from "../HelperFunctions";
 import { query, ref as dbRef, orderByChild, onValue } from "firebase/database";
 import { db } from "../firebase-config";
@@ -12,6 +13,7 @@ import like from "../images/like.png";
 import liked from "../images/liked.png";
 import PostsWithoutProfile from "../pageElements/PostsWithoutProfile";
 import { useAuthState } from "react-firebase-hooks/auth";
+import LogInPopUp from "../pageElements/LogInPopUp";
 
 const Blog = ({ isFollowing }) => {
   const params = useParams();
@@ -53,16 +55,25 @@ const Blog = ({ isFollowing }) => {
         if (snapshot.exists()) {
           let postsArray = [];
           snapshot.forEach((child) => {
-            if (
-              child.val().favorites !== undefined &&
-              Object.keys(child.val().favorites).includes(user.uid)
-            ) {
-              postsArray.push({
-                ...child.val(),
-                id: child.key,
-                src: liked,
-                className: "liked",
-              });
+            if (user) {
+              if (
+                child.val().favorites !== undefined &&
+                Object.keys(child.val().favorites).includes(user.uid)
+              ) {
+                postsArray.push({
+                  ...child.val(),
+                  id: child.key,
+                  src: liked,
+                  className: "liked",
+                });
+              } else {
+                postsArray.push({
+                  ...child.val(),
+                  id: child.key,
+                  src: like,
+                  className: "like",
+                });
+              }
             } else {
               postsArray.push({
                 ...child.val(),
@@ -81,8 +92,7 @@ const Blog = ({ isFollowing }) => {
         onlyOnce: true,
       }
     );
-    console.log(isFollowing(params.user));
-  }, []);
+  }, [user]);
 
   if (user && isFollowing(params.user)) {
     return (
@@ -112,29 +122,40 @@ const Blog = ({ isFollowing }) => {
     );
   } else {
     return (
-      <div id="content">
-        <div
-          id="userProfileContainer"
-          style={{ backgroundColor: userBackground }}
-        >
-          <img id="blogProfilePic" className="cover" src={userProfilePic}></img>
-          <div id="blogUserName">{params.user}</div>
-          <div id="blogTitle">{userTitle}</div>
-          <div id="blogDescription">{userDescription}</div>
-          <button
-            className="followBtn"
-            onClick={(e) => {
-              toggleFollow(e, params.user);
-            }}
+      <>
+        <LogInPopUp />
+        <div id="content">
+          <div
+            id="userProfileContainer"
+            style={{ backgroundColor: userBackground }}
           >
-            Follow
-          </button>
-          <PostsWithoutProfile
-            posts={userPosts}
-            classNames={MainPostClassNames}
-          />
+            <img
+              id="blogProfilePic"
+              className="cover"
+              src={userProfilePic}
+            ></img>
+            <div id="blogUserName">{params.user}</div>
+            <div id="blogTitle">{userTitle}</div>
+            <div id="blogDescription">{userDescription}</div>
+            <button
+              className="followBtn"
+              onClick={(e) => {
+                if (user) {
+                  toggleFollow(e, params.user);
+                } else {
+                  toggleLogInPopUp();
+                }
+              }}
+            >
+              Follow
+            </button>
+            <PostsWithoutProfile
+              posts={userPosts}
+              classNames={MainPostClassNames}
+            />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 };

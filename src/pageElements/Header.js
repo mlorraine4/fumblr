@@ -23,7 +23,9 @@ const Header = ({ user, notifications, changeTheme }) => {
         <NewPostTextOnlyForm user={user} />
         <div id="header">
           <div style={{ display: "flex" }}>
-            <img id="logo" alt="" src={logo}></img>
+            <Link to="/fumblr">
+              <img id="logo" alt="" src={logo}></img>
+            </Link>
             <input placeholder="Search Fumblr" id="searchBar"></input>
           </div>
           <div
@@ -35,7 +37,7 @@ const Header = ({ user, notifications, changeTheme }) => {
               marginRight: "20px",
             }}
           >
-            <Link to="/">
+            <Link to="/fumblr">
               <img
                 src={home}
                 alt=""
@@ -58,7 +60,7 @@ const Header = ({ user, notifications, changeTheme }) => {
                 className="navBarIcons"
                 onClick={toggleAccountDisplay}
               ></img>
-              <AccountPopUp user={user} changeTheme={changeTheme}/>
+              <AccountPopUp user={user} changeTheme={changeTheme} />
             </div>
             <div style={{ position: "relative" }}>
               <img

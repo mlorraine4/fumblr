@@ -226,6 +226,12 @@ function App() {
             }
           ></Route>
           <Route
+            path={"/fumblr"}
+            element={
+              <HomePage isFollowing={isFollowing} following={following} />
+            }
+          ></Route>
+          <Route
             path={"/fumblr/account/login"}
             element={<LogIn user={currentUser} />}
           ></Route>
@@ -267,13 +273,13 @@ function App() {
             }
           ></Route>
           <Route
-            path="fumblr/blog/:user"
+            path="/fumblr/blog/:user"
             element={
               <Blog following={following} isFollowing={isFollowingBlogPage} />
             }
           ></Route>
           <Route
-            path="fumblr/post/:id"
+            path="/fumblr/post/:id"
             element={<Post isFollowing={isFollowing} user={currentUser} />}
           ></Route>
         </Routes>

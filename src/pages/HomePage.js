@@ -23,6 +23,7 @@ import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { MainPostClassNames } from "../HelperFunctions";
 import Posts from "../pageElements/Posts";
+import LogInPopUp from "../pageElements/LogInPopUp";
 
 const HomePage = ({ isFollowing, following }) => {
   const auth = getAuth();
@@ -111,6 +112,29 @@ const HomePage = ({ isFollowing, following }) => {
           <div style={{ display: "flex" }}>
             <div id="homePosts">
               <NewPostButtons user={user} />
+              <div id="homePagePosts">
+                <Posts
+                  posts={allPosts}
+                  classNames={MainPostClassNames}
+                  following={following}
+                />
+              </div>
+            </div>
+            <div id="homeNewBlogs">
+              <NewBlogsToFollow isFollowing={isFollowing} posts={allPosts} />
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+  if (!user && !loading) {
+    return (
+      <>
+        <LogInPopUp />
+        <div id="content">
+          <div style={{ display: "flex" }}>
+            <div id="homePosts">
               <div id="homePagePosts">
                 <Posts
                   posts={allPosts}
