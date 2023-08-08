@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-const Followers = ({ followers }) => {
+const Following = ({ following }) => {
   const navigate = useNavigate();
   const auth = getAuth();
   const [user, loading, error] = useAuthState(auth);
@@ -16,16 +16,16 @@ const Followers = ({ followers }) => {
     return (
       <div id="content">
         <div id="followersPage">
-          <div id="followersPageTitle">Your Followers</div>
-          {followers.map((follower) => {
+          <div id="followersPageTitle">Following</div>
+          {following.map((following) => {
             return (
-              <Link to={`/fumblr/blog/${follower.user}`} key={follower.user}>
+              <Link to={`/fumblr/blog/${following.user}`} key={following.user}>
                 <div className="followersPageProfile">
                   <img
-                    src={follower.photoURL}
+                    src={following.photoURL}
                     className="followerProfile cover"
                   ></img>
-                  <div>{follower.user}</div>
+                  <div>{following.user}</div>
                 </div>
               </Link>
             );
@@ -34,8 +34,8 @@ const Followers = ({ followers }) => {
       </div>
     );
   } else {
-    return <div id="followers">Loading . . .</div>;
+    return <div id="following">Loading . . .</div>;
   }
 };
 
-export default Followers;
+export default Following;

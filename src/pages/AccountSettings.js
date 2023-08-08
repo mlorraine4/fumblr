@@ -66,7 +66,7 @@ const AccountSettings = () => {
     return (
       <div id="content" style={{ display: "flex" }}>
         <div id="accountPage">
-          <div>Account</div>
+          <div style={{fontWeight: "bold"}}>Account</div>
           <div id="updateEmailContainer" className="hide">
             <form id="updateEmailForm">
               <input

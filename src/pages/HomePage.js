@@ -23,7 +23,6 @@ import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { MainPostClassNames } from "../HelperFunctions";
 import Posts from "../pageElements/Posts";
-import Footer from "../pageElements/Footer";
 
 const HomePage = ({ isFollowing, following }) => {
   const auth = getAuth();
@@ -124,7 +123,6 @@ const HomePage = ({ isFollowing, following }) => {
               <NewBlogsToFollow isFollowing={isFollowing} posts={allPosts} />
             </div>
           </div>
-          <Footer />
         </div>
       </>
     );

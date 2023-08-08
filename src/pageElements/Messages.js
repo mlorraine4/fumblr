@@ -39,6 +39,7 @@ const Messages = ({ selectedUser, userProfile, chatID }) => {
             }}
           ></input>
           <button
+          className="accentBtn"
             type="submit"
             disabled={disabled}
             onClick={(e) => {

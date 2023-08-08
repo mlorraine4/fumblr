@@ -7,6 +7,7 @@ import {
 } from "../HelperFunctions";
 import RandomBlogs from "./RandomBlogs";
 import PostsWithoutProfile from "./PostsWithoutProfile";
+import Footer from "./Footer";
 
 const NewBlogsToFollow = ({ posts, isFollowing }) => {
   const [randomBlogs, setRandomBlogs] = useState([]);
@@ -51,6 +52,7 @@ const NewBlogsToFollow = ({ posts, isFollowing }) => {
           classNames={RadarClassNames}
           isFollowing={isFollowing}
         />
+        <Footer />
       </div>
     </>
   );

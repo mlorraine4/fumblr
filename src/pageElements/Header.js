@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import logo from "../images/letter-f.png";
-import Button from "../Button";
 import NotificationsPopUp from "./NotificationsPopUp";
 import AccountPopUp from "./AccountPopUp";
 import home from "../images/home.png";
@@ -15,9 +14,8 @@ import {
   toggleTextOnlyPostForm,
 } from "../HelperFunctions";
 import { NewPostTextOnlyForm } from "./NewPostPopUp";
-import { useEffect } from "react";
 
-const Header = ({ user, notifications }) => {
+const Header = ({ user, notifications, changeTheme }) => {
 
   if (user) {
     return (
@@ -60,7 +58,7 @@ const Header = ({ user, notifications }) => {
                 className="navBarIcons"
                 onClick={toggleAccountDisplay}
               ></img>
-              <AccountPopUp user={user} />
+              <AccountPopUp user={user} changeTheme={changeTheme}/>
             </div>
             <div style={{ position: "relative" }}>
               <img

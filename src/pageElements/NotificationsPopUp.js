@@ -30,8 +30,6 @@ const NotificationsPopUp = ({ user, notifications }) => {
                 alignItems: "center",
               }}
               key={notification.id}
-              onClick={() => {navigateToNotification(notification)
-              toggleNotificationsDisplay()}}
               onMouseEnter={(e) => {
                 removeNotificationDot(e);
                 showDeleteNotificationBtn(e);
@@ -52,7 +50,14 @@ const NotificationsPopUp = ({ user, notifications }) => {
                   className={getNotificationClassName(notification.seen)}
                 ></img>
               </div>
-              <div>{notification.notification}</div>
+              <div
+                onClick={() => {
+                  navigateToNotification(notification);
+                  toggleNotificationsDisplay();
+                }}
+              >
+                {notification.notification}
+              </div>
               <button
                 className="deleteNotification noOpacity"
                 onClick={() => {

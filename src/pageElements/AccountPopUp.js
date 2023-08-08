@@ -1,7 +1,7 @@
 import { signOutUser, toggleAccountDisplay } from "../HelperFunctions";
 import { Link } from "react-router-dom";
 
-const AccountPopUp = ({ user }) => {
+const AccountPopUp = ({ user, changeTheme }) => {
   return (
     <div id="accountPopUp" className="hide">
       <div
@@ -16,7 +16,7 @@ const AccountPopUp = ({ user }) => {
           Log Out
         </div>
       </div>
-      <Link>
+      <Link to="fumblr/account/following">
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Following
         </div>
@@ -27,14 +27,18 @@ const AccountPopUp = ({ user }) => {
         </div>
       </Link>
       <Link to={"/fumblr/settings/account"}>
-        <div
-          className="accountPopUpItem"
-          onClick={toggleAccountDisplay}
-          style={{ borderBottom: "0.5px solid var(--text-primary)" }}
-        >
+        <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Settings
         </div>
       </Link>
+      <div
+        className="accountPopUpItem"
+        style={{ borderBottom: "0.5px solid var(--text-primary)" }}
+      >
+        <button className="accentBtn" onClick={changeTheme}>
+          Change Theme
+        </button>
+      </div>
       <Link to={`/fumblr/blog/${user.displayName}`}>
         <div onClick={toggleAccountDisplay}>{user.displayName}'s Blog</div>
       </Link>
