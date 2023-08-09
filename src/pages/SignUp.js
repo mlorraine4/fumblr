@@ -48,7 +48,7 @@ const SignUp = () => {
             </form>
             <>
               <div>Have an account?</div>
-              <Link to="/fumblr/account/login">
+              <Link to="/account/login">
                 <button className="logInBtn">Log In</button>
               </Link>
             </>

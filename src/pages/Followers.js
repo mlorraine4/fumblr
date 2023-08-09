@@ -19,7 +19,7 @@ const Followers = ({ followers }) => {
           <div id="followersPageTitle">Your Followers</div>
           {followers.map((follower) => {
             return (
-              <Link to={`/fumblr/blog/${follower.user}`} key={follower.user}>
+              <Link to={`/blog/${follower.user}`} key={follower.user}>
                 <div className="followersPageProfile">
                   <img
                     src={follower.photoURL}
