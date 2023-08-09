@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import Button from "../Button";
 import { Link, useNavigate } from "react-router-dom";
 import { submitSignUpForm } from "../HelperFunctions";
 import { useAuthState } from "react-firebase-hooks/auth";

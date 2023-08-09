@@ -16,7 +16,6 @@ import {
 import { NewPostTextOnlyForm } from "./NewPostPopUp";
 
 const Header = ({ user, notifications, changeTheme }) => {
-
   if (user) {
     return (
       <>
@@ -89,7 +88,9 @@ const Header = ({ user, notifications, changeTheme }) => {
     return (
       <div id="header">
         <div style={{ display: "flex" }}>
-          <img id="logo" alt="" src={logo}></img>
+          <Link to="/">
+            <img id="logo" alt="" src={logo}></img>
+          </Link>
           <input placeholder="Search Fumblr" id="searchBar"></input>
         </div>
         <div>
