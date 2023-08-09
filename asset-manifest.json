@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/fumblr/static/css/main.e722fbb4.css",
-    "main.js": "/fumblr/static/js/main.0685fabc.js",
+    "main.js": "/fumblr/static/js/main.7a00bda5.js",
     "static/media/like.png": "/fumblr/static/media/like.3e18b1593d053260c22f.png",
     "static/media/headphones.png": "/fumblr/static/media/headphones.b899022b8ca28e31b586.png",
     "static/media/video-camera.png": "/fumblr/static/media/video-camera.14741fd13716ac50263d.png",
@@ -10,10 +10,10 @@
     "static/media/send.png": "/fumblr/static/media/send.ab573daa1e7d0810099a.png",
     "index.html": "/fumblr/index.html",
     "main.e722fbb4.css.map": "/fumblr/static/css/main.e722fbb4.css.map",
-    "main.0685fabc.js.map": "/fumblr/static/js/main.0685fabc.js.map"
+    "main.7a00bda5.js.map": "/fumblr/static/js/main.7a00bda5.js.map"
   },
   "entrypoints": [
     "static/css/main.e722fbb4.css",
-    "static/js/main.0685fabc.js"
+    "static/js/main.7a00bda5.js"
   ]
 }
