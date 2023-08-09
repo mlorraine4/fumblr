@@ -12,7 +12,7 @@ const NewPostButtons = ({ user }) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Link to="/fumblr/settings/blog">
+      <Link to="/settings/blog">
         <img
           id="mainProfileImg"
           className="cover"

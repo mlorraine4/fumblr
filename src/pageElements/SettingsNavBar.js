@@ -8,7 +8,7 @@ const SettingsNavBar = () => {
         <div className="navBarComponent" onClick={setCurrentPage}>
           Account
         </div>
-        <Link to={"/fumblr/settings/blog"}>
+        <Link to={"/settings/blog"}>
           <div className="navBarComponent" onClick={setCurrentPage}>
             Blog Appearance
           </div>

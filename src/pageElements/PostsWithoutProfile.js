@@ -15,7 +15,7 @@ const PostsWithoutProfile = ({ posts, classNames }) => {
               <div className={classNames.post}>
                 <div className="postHeader">
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <Link to={`/fumblr/blog/${post.author}`}>
+                    <Link to={`/blog/${post.author}`}>
                       <div className="postAuthor">{post.author}</div>
                     </Link>
                   </div>

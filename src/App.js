@@ -218,44 +218,38 @@ function App() {
             }
           ></Route>
           <Route
-            path={"/fumblr"}
-            element={
-              <HomePage isFollowing={isFollowing} following={following} />
-            }
-          ></Route>
-          <Route
-            path={"/fumblr/account/login"}
+            path={"/account/login"}
             element={<LogIn user={currentUser} />}
           ></Route>
           <Route
-            path={"/fumblr/account/signup"}
+            path={"/account/signup"}
             element={<SignUp user={currentUser} />}
           ></Route>
           <Route
-            path={"/fumblr/settings/account"}
+            path={"/settings/account"}
             element={<AccountSettings user={currentUser} />}
           ></Route>
           <Route
-            path={"/fumblr/settings/blog"}
+            path={"/settings/blog"}
             element={<ProfileSettings />}
           ></Route>
-          <Route path={"/fumblr/inbox"} element={<Inbox />}></Route>
+          <Route path={"/inbox"} element={<Inbox />}></Route>
           <Route
-            path={"/fumblr/account/posts"}
+            path={"/account/posts"}
             element={
               <UserPosts isFollowing={isFollowing} following={following} />
             }
           ></Route>
           <Route
-            path={"/fumblr/account/followers"}
+            path={"/account/followers"}
             element={<Followers followers={followers} />}
           ></Route>
           <Route
-            path={"/fumblr/account/following"}
+            path={"/account/following"}
             element={<Following following={following} />}
           ></Route>
           <Route
-            path={"/fumblr/account/liked-posts"}
+            path={"/account/liked-posts"}
             element={
               <SavedPosts
                 isFollowing={isFollowing}
@@ -265,13 +259,13 @@ function App() {
             }
           ></Route>
           <Route
-            path="/fumblr/blog/:user"
+            path="/blog/:user"
             element={
               <Blog following={following} isFollowing={isFollowingBlogPage} />
             }
           ></Route>
           <Route
-            path="/fumblr/post/:id"
+            path="/post/:id"
             element={<Post isFollowing={isFollowing} user={currentUser} />}
           ></Route>
         </Routes>

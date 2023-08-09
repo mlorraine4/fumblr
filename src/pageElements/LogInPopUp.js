@@ -23,7 +23,7 @@ const LogInPopUp = () => {
         </form>
         <>
           <div>New to Fumblr?</div>
-          <Link to="/fumblr/account/signup">
+          <Link to="/account/signup">
             <button className="signUpBtn">Sign Up</button>
           </Link>
         </>

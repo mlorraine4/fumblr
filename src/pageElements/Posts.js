@@ -23,7 +23,7 @@ const Posts = ({ posts, classNames, following }) => {
               <div className={classNames.post}>
                 <div className="postHeader">
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <Link to={`/fumblr/blog/${post.author}`}>
+                    <Link to={`/blog/${post.author}`}>
                       <div className="postAuthor">{post.author}</div>
                     </Link>
                   </div>
@@ -89,7 +89,7 @@ const Posts = ({ posts, classNames, following }) => {
               <div className={classNames.post}>
                 <div className="postHeader">
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <Link to={`/fumblr/blog/${post.author}`}>
+                    <Link to={`/blog/${post.author}`}>
                       <div className="postAuthor">{post.author}</div>
                     </Link>
                     <button

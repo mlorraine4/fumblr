@@ -6,7 +6,7 @@ const RandomBlogs = ({ blogs, isFollowing }) => {
     <div id="randomBlogsContent">
       {blogs.map((blog) => {
         return (
-          <Link to={`/fumblr/blog/${blog.user}`} key={blog.user}>
+          <Link to={`/blog/${blog.user}`} key={blog.user}>
             <div
               style={{ display: "flex", justifyContent: "space-between" }}
               className="blogContainer"

@@ -16,17 +16,17 @@ const AccountPopUp = ({ user, changeTheme }) => {
           Log Out
         </div>
       </div>
-      <Link to="fumblr/account/following">
+      <Link to="/account/following">
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Following
         </div>
       </Link>
-      <Link to="/fumblr/account/liked-posts">
+      <Link to="/account/liked-posts">
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Saved Posts
         </div>
       </Link>
-      <Link to={"/fumblr/settings/account"}>
+      <Link to={"/settings/account"}>
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Settings
         </div>
@@ -39,15 +39,15 @@ const AccountPopUp = ({ user, changeTheme }) => {
           Change Theme
         </button>
       </div>
-      <Link to={`/fumblr/blog/${user.displayName}`}>
+      <Link to={`/blog/${user.displayName}`}>
         <div onClick={toggleAccountDisplay}>{user.displayName}'s Blog</div>
       </Link>
-      <Link to={"/fumblr/account/posts"}>
+      <Link to={"/account/posts"}>
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Posts
         </div>
       </Link>
-      <Link to={"/fumblr/account/followers"}>
+      <Link to={"/account/followers"}>
         <div className="accountPopUpItem" onClick={toggleAccountDisplay}>
           Followers
         </div>
