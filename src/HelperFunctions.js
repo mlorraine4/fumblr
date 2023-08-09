@@ -214,7 +214,7 @@ export function writeTextOnlyPost(title, body, postKey) {
     title: title,
     starCount: 0,
     authorPic: user.photoURL,
-    timestamp: serverTimestamp,
+    timestamp: serverTimestamp(),
     descendingOrder: -1 * new Date().getTime(),
     imgUrl: "",
   };
@@ -288,7 +288,7 @@ export function writePostWithPhoto(title, body, url, postKey) {
     starCount: 0,
     authorPic: user.photoURL,
     imgUrl: url,
-    timestamp: serverTimestamp,
+    timestamp: serverTimestamp(),
     descendingOrder: -1 * new Date().getTime(),
   };
 
@@ -957,7 +957,6 @@ export function toggleTextOnlyPostForm() {
   document.getElementById("content").classList.toggle("fade");
   document.getElementById("content").classList.toggle("stop-scrolling");
   document.getElementById("header").classList.toggle("fade");
-  document.getElementById("textOnlyPostForm").reset();
 }
 
 export function toggleWithPhotoPostForm() {
@@ -965,7 +964,6 @@ export function toggleWithPhotoPostForm() {
   document.getElementById("content").classList.toggle("fade");
   document.getElementById("content").classList.toggle("stop-scrolling");
   document.getElementById("header").classList.toggle("fade");
-  document.getElementById("withPhotoPostForm").reset();
 }
 
 export function displayAccountTaken() {

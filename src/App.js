@@ -4,10 +4,7 @@ import { initializeApp } from "firebase/app";
 import { getFirebaseConfig, db } from "./firebase-config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
-  child,
   ref as dbRef,
-  getDatabase,
-  get,
   onValue,
   query,
   orderByChild,
@@ -24,18 +21,13 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Followers from "./pages/Followers";
 import SavedPosts from "./pages/SavedPosts";
 import {
-  getFollowers,
   getUserProfilePic,
-  getUserNotifications,
-  getFollowing,
-  removeFollow,
   getPost,
 } from "./HelperFunctions";
 import Blog from "./pages/Blog";
 import Post from "./pages/Post";
 import liked from "./images/liked.png";
 import Following from "./pages/Following";
-// TODO: follow, like function needs to check if a user is signed in. if not, show sign in pop up
 
 function App() {
   const auth = getAuth();

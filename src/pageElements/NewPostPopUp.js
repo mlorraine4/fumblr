@@ -24,7 +24,7 @@ const NewPostWithPhotoForm = ({ user }) => {
     reader.onerror = function () {
       console.log(reader.error);
     };
-    document.getElementById("postForm").reset();
+    document.getElementById("withPhotoPostForm").reset();
   }
 
   return (
@@ -32,11 +32,21 @@ const NewPostWithPhotoForm = ({ user }) => {
       <img src={user.photoURL} id="newPostUserImg" alt=""></img>
       <form id="withPhotoPostForm">
         <input id="title" placeholder="title"></input>
-        <input id="body" placeholder="Your text here"></input>
+        <textarea id="body" placeholder="Your text here"></textarea>
         <input type="file" id="fileInput"></input>
         <div id="formError"></div>
-        <button onClick={toggleWithPhotoPostForm}>cancel</button>
-        <button onClick={submitForm}>post</button>
+        <button className="accentBtn" onClick={submitForm}>
+          post
+        </button>
+        <button
+          className="cancelBtn"
+          onClick={() => {
+            toggleWithPhotoPostForm();
+            document.getElementById("withPhotoPostForm").reset();
+          }}
+        >
+          cancel
+        </button>
       </form>
     </div>
   );
@@ -51,7 +61,8 @@ const NewPostTextOnlyForm = ({ user }) => {
     const newPostKey = push(child(dbRef(db), "posts")).key;
     writeTextOnlyPost(title, body, newPostKey);
 
-    document.getElementById("postForm").reset();
+    document.getElementById("textOnlyPostForm").reset();
+    toggleTextOnlyPostForm();
   }
 
   return (
@@ -59,11 +70,24 @@ const NewPostTextOnlyForm = ({ user }) => {
       <img src={user.photoURL} id="newPostUserImg" alt=""></img>
       <form id="textOnlyPostForm">
         <input id="title" placeholder="title"></input>
-        <input id="body" placeholder="Your text here"></input>
-        <input type="file" id="fileInput"></input>
+        <textarea
+          maxLength="200"
+          id="body"
+          placeholder="Your text here"
+        ></textarea>
         <div id="formError"></div>
-        <button onClick={toggleTextOnlyPostForm}>cancel</button>
-        <button onClick={submitForm}>post</button>
+        <button className="accentBtn" onClick={submitForm}>
+          post
+        </button>
+        <button
+          className="cancelBtn"
+          onClick={() => {
+            toggleTextOnlyPostForm();
+            document.getElementById("textOnlyPostForm").reset();
+          }}
+        >
+          cancel
+        </button>
       </form>
     </div>
   );
