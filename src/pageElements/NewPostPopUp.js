@@ -31,6 +31,7 @@ const NewPostWithPhotoForm = ({ user }) => {
     <div id="newPostWithPhotoForm" className="hide">
       <img src={user.photoURL} id="newPostUserImg" alt=""></img>
       <form id="withPhotoPostForm">
+        <div style={{ fontWeight: "bold" }}>{user.displayName}'s Blog</div>
         <input id="title" placeholder="title"></input>
         <textarea id="body" placeholder="Your text here"></textarea>
         <input type="file" id="fileInput"></input>
@@ -69,6 +70,7 @@ const NewPostTextOnlyForm = ({ user }) => {
     <div id="newPostTextOnlyForm" className="hide">
       <img src={user.photoURL} id="newPostUserImg" alt=""></img>
       <form id="textOnlyPostForm">
+        <div style={{fontWeight: "bold"}}>{user.displayName}'s Blog</div>
         <input id="title" placeholder="title"></input>
         <textarea
           maxLength="200"

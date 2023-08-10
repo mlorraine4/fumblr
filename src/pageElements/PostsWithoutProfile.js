@@ -11,7 +11,7 @@ const PostsWithoutProfile = ({ posts, classNames }) => {
       <div id="posts">
         {posts.map((post) => {
           return (
-            <div style={{ display: "flex" }} key={post.id}>
+            <div style={{ display: "flex"}} key={post.id}>
               <div className={classNames.post}>
                 <div className="postHeader">
                   <div style={{ display: "flex", alignItems: "center" }}>

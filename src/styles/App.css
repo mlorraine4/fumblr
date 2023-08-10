@@ -28,7 +28,7 @@
   --accent: rgb(207, 97, 251);
   --accent-faded: rgb(207, 97, 251, 0.5);
   --faded: rgb(109, 104, 114);
-  --subtle: rgb(222, 227, 230);
+  --subtle: rgb(209, 191, 215);
   --form-control-color: rebeccapurple;
 }
 
@@ -53,6 +53,11 @@ input[type="radio"] {
 
 input[type="radio"]:checked+label {
   background-color: var(--subtle);
+}
+
+label {
+  padding: 5px;
+  border-radius: 8px;
 }
 
 
@@ -115,7 +120,7 @@ input:focus:invalid {
   background-color: var(--background);
   position: relative;
   min-width: min-content;
-  width: 100vw;
+  width: 97vw;
   padding-top: 80px;
   padding-bottom: 40px;
 }
@@ -308,7 +313,9 @@ input:focus:invalid {
 /* HOME PAGE */
 
 #homePosts {
-  margin-top: 20px;
+  width: 70%;
+  max-width: 700px;
+  margin: 20px 0px 0px auto;
 }
 
 #newPostButtons {
@@ -320,8 +327,12 @@ input:focus:invalid {
   background-color: var(--secondary-background);
   height: min-content;
   padding: 5px;
-  width: 490px;
+  width: 80%;
   margin-bottom: 50px;
+}
+
+.newPostBtn {
+  width: 15%;
 }
 
 .imgBackground {
@@ -333,7 +344,7 @@ input:focus:invalid {
 }
 
 .postImg {
-  width: 500px;
+  width: 100%;
   height: auto;
 }
 
@@ -399,21 +410,20 @@ textarea {
 
 #mainProfileImg, .userProfile {
   border-radius: 12px;
-  margin-right: 20px;
 }
 
 #mainProfileImg {
-  height: 100px;
-  width: 100px;
-  margin-left: 100px;
+  height: 5em;
+  width: 5em;
+  margin: 0 10px 0 10px;
 }
 
 .userProfile {
-  height: 85px;
-  width: 85px;
+  height: 5em;
+  width: 5em;
   position: sticky;
   top: 64px;
-  margin-top: 15px;
+  margin: 15px 10px 0 10px;
 }
 
 .newPostImg {
@@ -424,15 +434,24 @@ textarea {
 #posts {
   color: var(--text-primary);
   text-align: center;
+  width: 95%;
+  margin: auto;
 }
 
 #homePagePosts {
-  margin-left: 115px;
+  width: 100%;
+  margin: 0 auto 0 auto;
+}
+
+#newPostsBtns {
+  width: min-content;
+  margin: auto;
 }
 
 .post {
-  width: 500px;
-  margin-top: 15px;
+  width: 80%;
+  padding: 10px;
+  margin: 15px auto 0 auto;
 }
 
 .post, .postHeader {
@@ -496,7 +515,7 @@ textarea {
 }
 
 #postPage, #savedPostPage {
-  width: min-content;
+  width: 80%;
   margin: auto;
 }
 
@@ -653,13 +672,15 @@ textarea {
 /* NEW BLOGS NAVBAR */
 
 #homeNewBlogs {
-  margin-right: 50px;
+  width: 35%;
+  max-width: 400px;
+  margin: 20px auto 0px auto;
 }
 
 .newBlogsContainer {
   color: var(--accent);
   text-align: left;
-  margin: 10px 0 40px 40px;
+  margin-bottom: 40px;
 }
 
 .newBlogsTitle {
@@ -674,7 +695,8 @@ textarea {
 }
 
 #randomBlogsContent {
-  min-width: 400px;
+  min-width: 350px;
+  width: min-content;
 }
 
 .blogContainer {
@@ -756,7 +778,7 @@ textarea {
 }
 
 #userPostsPage {
-  width: min-content;
+  width: 80%;
   margin: auto;
 }
 
@@ -764,6 +786,7 @@ textarea {
 
 #newChatForm {
   position: absolute;
+  padding: 10px;
   top: 80px;
   right: 0;
   left: 0;
@@ -784,16 +807,8 @@ textarea {
   cursor: pointer;
 }
 
-#chatBtn {
-  background-color: var(--text-secondary);
-  color: black;
-  font-weight: bold;
-}
-
-#chatBtn:disabled {
-  background-color: gray;
-  opacity: 0.8;
-  cursor: default;
+.matchingUserDiv {
+  margin: 10px;
 }
 
 #messagesContainer {
@@ -961,7 +976,7 @@ textarea {
 /* BLOG PAGE */
 
 #userProfileContainer {
-  width: min-content;
+  width: 80%;
   padding: 20px 50px 20px 50px;
   margin: auto;
   border-radius: 8px;

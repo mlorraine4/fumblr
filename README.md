@@ -1,5 +1,5 @@
 <h1 align='center'>Fumblr</h1>
-<h3 align='center'>Fumblr: a social media app based on Tumblr.</h3>
+<h3 align='center'>Fumblr: a fake social media app based on Tumblr.</h3>
 
 ![Preview](/preview/preview.png)
 
@@ -32,5 +32,6 @@
 - Customize your profile, add your own profile image, and add a description for your blog.
 - See your liked posts, followers, and who you are following.
 - Recieve notifications for other users following you, liking your posts, or sending you a message.
+- 🌞 Light and 🌚 Dark theme!
 
 </br>

@@ -46,8 +46,8 @@ const NewChatForm = ({ changeChat }) => {
   return (
     <div id="newChatForm" className="hide">
       <div>
-        <div>New Message</div>
-        <button onClick={toggleChatForm}>x</button>
+        <div style={{fontWeight: "bold", padding: "20px"}}>New Message</div>
+        <button style={{position: "absolute", right: "10px", top: "0"}}id="cancelBtn" onClick={toggleChatForm}>x</button>
       </div>
       <label htmlFor="search">To:</label>
       <input
@@ -81,6 +81,7 @@ const NewChatForm = ({ changeChat }) => {
         <button
           type="submit"
           id="chatBtn"
+          className="accentBtn"
           onClick={(e) => {
             changeChat(submitNewChatForm(e));
             toggleChatForm();

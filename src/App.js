@@ -266,7 +266,7 @@ function App() {
           ></Route>
           <Route
             path="/post/:id"
-            element={<Post isFollowing={isFollowing} user={currentUser} />}
+            element={<Post following={following} user={currentUser} />}
           ></Route>
         </Routes>
       </HashRouter>

@@ -681,7 +681,6 @@ export async function getBlogProfiles() {
   return get(child(ref, "user-profiles"));
 }
 
-//  TODO: replace get photoURL function for this one!
 //  Get profile picture url, blog title, and blog description for a user.
 export async function getUserBlogProfile(userDisplayName) {
   const ref = dbRef(getDatabase());

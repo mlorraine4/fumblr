@@ -5,13 +5,13 @@ import Posts from "../pageElements/Posts";
 import like from "../images/like.png";
 import liked from "../images/liked.png";
 
-// TODO: get post based on id
-const Post = ({ isFollowing, user }) => {
+const Post = ({ following, user }) => {
   const params = useParams();
   const [post, setPost] = useState([]);
 
   useEffect(() => {
     if (user) {
+      console.log(params);
       getPost(params.id).then((snapshot) => {
         let postArray = [];
         if (
@@ -43,7 +43,7 @@ const Post = ({ isFollowing, user }) => {
         <Posts
           posts={post}
           classNames={MainPostClassNames}
-          isFollowing={isFollowing}
+          following={following}
         />
       </div>
     </div>

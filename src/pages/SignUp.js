@@ -72,7 +72,7 @@ const SignUp = () => {
         >
           Resend Email
         </button>
-        <Link to="/fumblr">
+        <Link to="/">
           <button className="logInBtn">Return to Dashboard</button>
         </Link>
       </div>

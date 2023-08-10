@@ -7,12 +7,12 @@ const NotificationsPopUp = ({ user, notifications }) => {
 
   function navigateToNotification(notification) {
     if (notification.type === "like") {
-      return navigate(`/fumblr/post/${notification.id}`);
+      return navigate(`/post/${notification.id}`);
     } if (notification.type === "message") {
-      return navigate("/fumblr/inbox");
+      return navigate("/inbox");
     }
     if (notification.type === "follow") {
-      return navigate(`/fumblr/blog/${notification.sender}`);
+      return navigate(`/blog/${notification.sender}`);
     }
   }
 

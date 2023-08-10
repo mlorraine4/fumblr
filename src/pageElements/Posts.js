@@ -18,7 +18,7 @@ const Posts = ({ posts, classNames, following }) => {
       {posts.map((post) => {
         if (following.some((e) => e.user === post.author)) {
           return (
-            <div style={{ display: "flex" }} key={post.id}>
+            <div style={{ display: "flex", width: "100%" }} key={post.id}>
               <img src={post.authorPic} className={classNames.profile}></img>
               <div className={classNames.post}>
                 <div className="postHeader">
