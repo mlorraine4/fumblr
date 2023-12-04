@@ -29,7 +29,7 @@
 - Follow/unfollow other users.
 - Like/unlike user's posts.
 - Message other users.
-- Customize your profile, add your own profile image, and add a description for your blog.
+- Customize your profile! Add your own profile image and description for your blog.
 - See your liked posts, followers, and who you are following.
 - Recieve notifications for other users following you, liking your posts, or sending you a message.
 - 🌞 Light and 🌚 Dark theme!
